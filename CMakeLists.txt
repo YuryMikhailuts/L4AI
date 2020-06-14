@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.16)
+project(Library4ArtificialIntelligence)
+set(CMAKE_CXX_STANDARD 17)
+add_subdirectory(L4AI)
+add_subdirectory(L4AIShell)
