@@ -51,7 +51,7 @@ namespace l4ai::algs {
 		template<class TTarget>
 		constexpr inline const TTarget& as() const { return *as_ptr<TTarget>(); }
 
-		inline AlgorithmType type() { return alg_type; }
+		inline AlgorithmType type() const { return alg_type; }
 	};
 
 } // l4ai::algs
