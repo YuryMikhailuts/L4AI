@@ -22,7 +22,20 @@ namespace l4ai::algs {
 		using calculator_t = Calculator<TValue>;
 		using value_t = typename calculator_t::value_t;
 		using instance_ptr_t = typename calculator_t::instance_ptr_t;
+		using activation_function_t = value_t (*)(const value_t& );
+	private:
+		inline static activation_function_t getActivationFunction(ActivationFunctions af) {
+			switch (af) {
+				case ActivationFunctions::ArcTangent: return [](const value_t& x_value) -> value_t { return atan(x_value); };
+				case ActivationFunctions::Heaviside: return [](const value_t& x_value) -> value_t { return (x_value < 0) ? 0 : 1; };
+				case ActivationFunctions::HyperbolicTangent: return [](const value_t& x_value) -> value_t { return (exp(x_value) - exp(-1)) / (exp(x_value) + exp(-x_value)); };
+				case ActivationFunctions::Logistic: return [](const value_t& x_value) -> value_t { return 1 / (1 + exp(-x_value)); };
+				case ActivationFunctions::Trivial: return [](const value_t& x_value) -> value_t { return x_value; };
+				default: return [](const value_t& x_value){ return x_value; };
+			}
+		}
 	protected:
+		const activation_function_t activation_function;
 		const PerceptronInstance<TValue>& getPerceptronInstance() const {
 			const Instance<TValue>& inst = *calculator_t::instance;
 			return static_cast<const PerceptronInstance<TValue>&>(inst);
@@ -33,7 +46,7 @@ namespace l4ai::algs {
 				target += row[i] * col[i];
 		}
 
-		PerceptronCalculator(instance_ptr_t&& instance) : calculator_t::Calculator(move(instance)) {}
+		PerceptronCalculator(instance_ptr_t&& instance) : calculator_t::Calculator(move(instance)), activation_function(getActivationFunction(getPerceptronInstance().getPerceptron().getFunction())) {}
 	};
 
 	template<typename TValue>
@@ -88,6 +101,7 @@ namespace l4ai::algs {
 				if (part1_length > 0) perceptron_calculator_t::RowMulCol(part1_length, &in_data[rows_offset], &weight_col[0], out_data[i]);
 				if (part2_length > 0) perceptron_calculator_t::RowMulCol(part2_length, &in_data[rows_offset], &weight_col[part1_length], out_data[i]);
 				if (use_shift) out_data[i] += inst.getWeight(rows_count - 1, i);
+				out_data[i] = perceptron_calculator_t::activation_function(out_data[i]);
 				// Пересчитываем смещение индекса входного вектора.
 				rows_offset += alg.getRowsOffset();
 				rows_offset = rows_offset % in_length;
@@ -95,9 +109,7 @@ namespace l4ai::algs {
 			return result;
 		}
 	public:
-		FlatPerceptronCalculator(instance_ptr_t&& instance) : perceptron_calculator_t::PerceptronCalculator(move(instance)) {
-
-		}
+		FlatPerceptronCalculator(instance_ptr_t&& instance) : perceptron_calculator_t::PerceptronCalculator(move(instance)) {}
 	};
 
 
