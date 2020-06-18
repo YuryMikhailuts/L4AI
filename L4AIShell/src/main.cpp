@@ -1,8 +1,8 @@
+#include <calculator.h>
 #include <iostream>
 #include <instance.h>
 #include <perceptroninstance.h>
 #include <flatperceptron.h>
-#include <Calculator.h>
 
 using namespace std;
 using namespace l4ai::algs;

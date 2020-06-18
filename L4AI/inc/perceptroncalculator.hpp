@@ -8,7 +8,7 @@
 #ifndef L4AI_INC_PERCEPTRONCALCULATOR_HPP_
 #define L4AI_INC_PERCEPTRONCALCULATOR_HPP_
 #include <algorithm.h>
-#include <Calculator.h>
+#include <calculator.h>
 #include <flatperceptron.h>
 #include <perceptroninstance.h>
 #include <math.h>

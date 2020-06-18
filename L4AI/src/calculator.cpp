@@ -5,7 +5,7 @@
  *      Author: unknown
  */
 
-#include <Calculator.hpp>
+#include <calculator.hpp>
 
 namespace l4ai::algs {
 

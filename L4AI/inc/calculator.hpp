@@ -8,8 +8,8 @@
 #ifndef L4AI_INC_CALCULATOR_HPP_
 #define L4AI_INC_CALCULATOR_HPP_
 #include <algorithm.h>
+#include <calculator.h>
 #include <perceptron.h>
-#include <Calculator.h>
 #include <perceptroncalculator.hpp>
 
 namespace l4ai::algs {
