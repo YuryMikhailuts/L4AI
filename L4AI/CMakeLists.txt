@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(L4AI)
+set(CMAKE_CXX_STANDARD 17)
 option(L4AI_BUILD_STATIC "Build the static library" OFF)
 set(L4AI_SOURCES
 	"src/algorithm.cpp"
