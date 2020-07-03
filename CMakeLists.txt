@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 set(CMAKE_C_COMPILER_ARG1 "-std=c11") 
 set(CMAKE_C_COMPILER_ID "GNU") 
-set(CMAKE_CXX_COMPILER_ARG1 "-std=c++17") 
+set(CMAKE_CXX_COMPILER_ARG1 "-std=c++17 -Wimplicit-fallthrough")
 set(CMAKE_CXX_COMPILER_ID "GNU") 
 project(Library4ArtificialIntelligence)
 set(CMAKE_ECLIPSE_VERSION 4.11)

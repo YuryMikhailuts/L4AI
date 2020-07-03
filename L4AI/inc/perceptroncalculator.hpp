@@ -7,52 +7,36 @@
 
 #ifndef L4AI_INC_PERCEPTRONCALCULATOR_HPP_
 #define L4AI_INC_PERCEPTRONCALCULATOR_HPP_
-#include <algorithm.h>
+#include <perceptronexecutorbase.h>
 #include <calculator.h>
-#include <flatperceptron.h>
-#include <perceptroninstance.h>
-#include <math.h>
 
 namespace l4ai::algs {
 	using namespace std;
 
 	template<typename TValue>
-	class PerceptronCalculator : public Calculator<TValue> {
+	class PerceptronCalculator : public Calculator<TValue>, public PerceptronExecutorBase<TValue> {
 	public:
 		using calculator_t = Calculator<TValue>;
+		using perceptron_executor_base_t = PerceptronExecutorBase<TValue>;
 		using value_t = typename calculator_t::value_t;
 		using instance_ptr_t = typename calculator_t::instance_ptr_t;
 		using activation_function_t = value_t (*)(const value_t& );
-	private:
-		inline static activation_function_t getActivationFunction(ActivationFunctions af) {
-			switch (af) {
-				case ActivationFunctions::ArcTangent: return [](const value_t& x_value) -> value_t { return atan(x_value); };
-				case ActivationFunctions::Heaviside: return [](const value_t& x_value) -> value_t { return (x_value < 0) ? 0 : 1; };
-				case ActivationFunctions::HyperbolicTangent: return [](const value_t& x_value) -> value_t { return (exp(x_value) - exp(-1)) / (exp(x_value) + exp(-x_value)); };
-				case ActivationFunctions::Logistic: return [](const value_t& x_value) -> value_t { return 1 / (1 + exp(-x_value)); };
-				case ActivationFunctions::Trivial: return [](const value_t& x_value) -> value_t { return x_value; };
-				default: return [](const value_t& x_value){ return x_value; };
-			}
-		}
 	protected:
-		const activation_function_t activation_function;
 		const PerceptronInstance<TValue>& getPerceptronInstance() const {
 			const Instance<TValue>& inst = *calculator_t::instance;
 			return static_cast<const PerceptronInstance<TValue>&>(inst);
 		}
 
-		void RowMulCol(size_t count, const value_t* row, const value_t* col, value_t& target) const {
-			for(size_t i = 0; i < count; ++i)
-				target += row[i] * col[i];
-		}
-
-		PerceptronCalculator(instance_ptr_t&& instance) : calculator_t::Calculator(move(instance)), activation_function(getActivationFunction(getPerceptronInstance().getPerceptron().getFunction())) {}
+		PerceptronCalculator(instance_ptr_t&& instance) :
+			calculator_t::Calculator(move(instance)),
+			perceptron_executor_base_t::PerceptronExecutorBase(getPerceptronInstance().getPerceptron().getFunction()) {}
 	};
 
 	template<typename TValue>
 	class FlatPerceptronCalculator : public PerceptronCalculator<TValue> {
 	public:
 		using perceptron_calculator_t = PerceptronCalculator<TValue>;
+		using perceptron_executor_base_t = typename perceptron_calculator_t::perceptron_executor_base_t;
 		using calculator_t = typename perceptron_calculator_t::calculator_t;
 		using value_t = typename perceptron_calculator_t::value_t;
 		using instance_ptr_t = typename calculator_t::instance_ptr_t;
@@ -98,14 +82,14 @@ namespace l4ai::algs {
 				size_t part2_length = avl_rows_count - part1_length;
 				// Умножаем каждую часть только, если её длина не равна нулю.
 				out_data[i] = 0;
-				if (part1_length > 0) perceptron_calculator_t::RowMulCol(part1_length, &in_data[rows_offset], &weight_col[0], out_data[i]);
-				if (part2_length > 0) perceptron_calculator_t::RowMulCol(part2_length, &in_data[rows_offset], &weight_col[part1_length], out_data[i]);
+				if (part1_length > 0) perceptron_executor_base_t::RowMulCol(part1_length, &in_data[rows_offset], &weight_col[0], out_data[i]);
+				if (part2_length > 0) perceptron_executor_base_t::RowMulCol(part2_length, &in_data[rows_offset], &weight_col[part1_length], out_data[i]);
 				if (use_shift) out_data[i] += inst.getWeight(rows_count - 1, i);
-				out_data[i] = perceptron_calculator_t::activation_function(out_data[i]);
 				// Пересчитываем смещение индекса входного вектора.
 				rows_offset += alg.getRowsOffset();
 				rows_offset = rows_offset % in_length;
 			}
+			perceptron_executor_base_t::activation_func(out_data, out_data, out_length);
 			return result;
 		}
 	public:

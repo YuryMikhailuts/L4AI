@@ -5,7 +5,7 @@
  *      Author: unknown
  */
 
-#include "trainer.hpp"
+#include <trainer.hpp>
 
 namespace l4ai::algs {
 

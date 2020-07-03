@@ -46,10 +46,14 @@ namespace l4ai::algs {
 
 		size_t getWeightsCols() const;
 		size_t getWeightsRows() const;
-		inline value_t& getWeight(size_t row, size_t col) { return weights[col * rows_count + row]; }
-		inline const value_t& getWeight(size_t row, size_t col) const { return weights[col * rows_count + row]; }
-		inline value_t* getWeightColumn(size_t col) { return &weights[col * rows_count]; }
-		inline const value_t* getWeightColumn(size_t col) const { return &weights[col  * rows_count]; }
+		inline static constexpr const value_t* column(const value_t* weights, size_t col, size_t rows_count) { return &weights[col  * rows_count]; }
+		inline static constexpr value_t* column(value_t* weights, size_t col, size_t rows_count) { return &weights[col  * rows_count]; }
+		inline static constexpr const value_t& at(const value_t* weights, size_t col, size_t row, size_t rows_count) { return column(weights, col, rows_count)[row]; }
+		inline static constexpr value_t& at(value_t* weights, size_t col, size_t row, size_t rows_count) { return column(weights, col, rows_count)[row]; }
+		inline value_t& getWeight(size_t row, size_t col) { return at(weights, col, row, rows_count); }
+		inline const value_t& getWeight(size_t row, size_t col) const { return at(weights, col, row, rows_count); }
+		inline value_t* getWeightColumn(size_t col) { return column(weights, col, rows_count); }
+		inline const value_t* getWeightColumn(size_t col) const { return column(weights, col, rows_count); }
 	};
 
 	using PerceptronInstF32 = PerceptronInstance<float>;

@@ -17,9 +17,9 @@ namespace l4ai::algs {
 		 **/
 		Trivial,
 		/**
-		 * @brief f(x) = (x < 0) ? 0 : 1;
+		 * @brief f(x) = (x < 0) ? 0 : x;
 		 */
-		Heaviside,
+		ReLU,
 		/**
 		 * @brief f(x) = σ(x) = 1 / (1 + exp(-x))
 		 */
