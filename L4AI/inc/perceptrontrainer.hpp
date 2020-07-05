@@ -58,9 +58,7 @@ namespace l4ai::algs {
 		using trainer_context_t = typename trainer_t::trainer_context_t;
 		using perceptron_executor_base_t = PerceptronExecutorBase<TValue>;
 		using perceptron_context_t = PerceptronContext<TValue>;
-		static const value_t DEFAULT_TRAIN_SPEED;
 	protected:
-		value_t train_speed;
 
 		PerceptronInstance<TValue>& getPerceptronInstance() const {
 			Instance<TValue>& inst = *trainer_t::instance;
@@ -69,20 +67,12 @@ namespace l4ai::algs {
 
 		PerceptronTrainer(instance_ptr_t&& instance)
 			:	trainer_t::Trainer(move(instance)),
-				perceptron_executor_base_t::PerceptronExecutorBase(getPerceptronInstance().getPerceptron().getFunction()),
-				train_speed(DEFAULT_TRAIN_SPEED) {}
+				perceptron_executor_base_t::PerceptronExecutorBase(getPerceptronInstance().getPerceptron().getFunction()) {}
 	public:
 		virtual std::unique_ptr<trainer_context_t> makeContext() const override final {
 			return std::unique_ptr<trainer_context_t>(move(perceptron_context_t::make(getPerceptronInstance().getPerceptron())));
 		}
-
-		void setTrainSpeed(value_t value) { train_speed = value; }
 	};
-
-	template<>
-	const float PerceptronTrainer<float>::DEFAULT_TRAIN_SPEED = 0.01f;
-	template<>
-	const double PerceptronTrainer<double>::DEFAULT_TRAIN_SPEED = 0.01;
 
 
 	template<typename TValue>
@@ -183,6 +173,7 @@ namespace l4ai::algs {
 			size_t rows_count = alg.getWeightsRows();
 			size_t rows_offset = 0;
 			size_t avl_rows_count = rows_count - (use_shift ? 1 : 0);
+			value_t speed = trainer_t::train_speed;
 			if (err_diff_in != nullptr) {
 				memset(err_diff_in, 0, in_length * sizeof(value_t));
 				for(size_t i = 0; i < out_length; ++i) {
@@ -191,7 +182,7 @@ namespace l4ai::algs {
 					for(size_t j = 0; j < avl_rows_count; ++j) {
 						size_t in_index = (j + rows_offset)  % in_length;
 						err_diff_in[in_index] += wcol[j] * err_diff_summ_i;
-						wcol[j] += err_diff_summ_i * in_data[in_index];
+						wcol[j] -= err_diff_summ_i * in_data[in_index] * speed;
 					}
 					rows_offset += alg.getRowsOffset();
 					rows_offset = rows_offset % in_length;
@@ -202,7 +193,7 @@ namespace l4ai::algs {
 					value_t* wcol = inst.getWeightColumn(i);
 					for(size_t j = 0; j < avl_rows_count; ++j) {
 						size_t in_index = (j + rows_offset)  % in_length;
-						wcol[j] += err_diff_summ_i * in_data[in_index];
+						wcol[j] -= err_diff_summ_i * in_data[in_index] * speed;
 					}
 					rows_offset += alg.getRowsOffset();
 					rows_offset = rows_offset % in_length;

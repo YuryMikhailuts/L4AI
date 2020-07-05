@@ -42,6 +42,7 @@ namespace l4ai::algs {
 			using instance_ptr_t = ptr_t<instance_t>;
 			using error_function_t = value_t (*)(size_t count, const value_t* origin, const value_t* calculate);
 			using trainer_context_t = ITrainerContext<value_t>;
+			static const value_t default_train_speed;
 		protected:
 			instance_ptr_t instance;
 			const ErrorFunctionType error_function_type;
@@ -55,8 +56,14 @@ namespace l4ai::algs {
 			 * Вычисляется в конце каждого успешного вызова @link l4ai::algs::Trainer::toTrain @endlink как среднее арифметическое последнего скользящего среднего и новой величины ошибки.
 			 */
 			value_t float_average_error;
+
+			value_t train_speed;
 			Trainer(instance_ptr_t&& instance, std::optional<ErrorFunctionType> error_function_type = std::nullopt);
 		public:
+
+			inline value_t getTrainSpeed() const { return train_speed; }
+
+			inline void setTrainSpeed(value_t value) { train_speed = value; }
 
 			virtual ~Trainer();
 

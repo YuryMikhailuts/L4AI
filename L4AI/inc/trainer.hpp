@@ -58,7 +58,11 @@ namespace l4ai::algs {
 	Trainer<TValue>::Trainer(instance_ptr_t&& instance, std::optional<ErrorFunctionType> error_function_type)
 		: instance(move(instance)),
 		  error_function_type(error_function_type ? *error_function_type : ErrorFunctionType::StandardDeviationSquare),
-		  error_function(getErrorFunction<TValue>(this->error_function_type)) {}
+		  error_function(getErrorFunction<TValue>(this->error_function_type)),
+		  last_error_value(),
+		  float_average_error(),
+		  train_speed(default_train_speed)
+		  {}
 
 
 	template<typename TValue>
