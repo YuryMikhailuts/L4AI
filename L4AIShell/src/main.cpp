@@ -30,10 +30,10 @@ trainer_ptr_t tfp1, tfp2;
 context_ptr_t cfp1, cfp2;
 calculator_ptr_t calc1, calc2;
 
-static constexpr size_t INTERNAL_LAYER_LENGTH = 30;
+static constexpr size_t INTERNAL_LAYER_LENGTH = 20;
 
 int main() {
-	std::shared_ptr<PerceptronInstF32> ifp1 = makeFP(1, INTERNAL_LAYER_LENGTH, ActivationFunctions::Logistic);
+	std::shared_ptr<PerceptronInstF32> ifp1 = makeFP(1, INTERNAL_LAYER_LENGTH, ActivationFunctions::ArcTangent);
 	std::shared_ptr<PerceptronInstF32> ifp2 = makeFP(INTERNAL_LAYER_LENGTH, 1, ActivationFunctions::Trivial);
 	InitWeights(ifp1, -1, 1);
 	InitWeights(ifp2, -1, 1);
@@ -45,17 +45,12 @@ int main() {
 	cfp2 = move(tfp2->makeContext());
 	float last_error = show_error();
 	uint32_t NK = 1;
-	for(size_t i = 0; i < 1000 * 1000; ++i) {
+	for(size_t i = 0; i < 1000000; ++i) {
 		step();
-		if (i % 1000 == 0) {
+		if (i % 10000 == 0) {
 			last_error = show_error();
 		}
-		if (i % (100000 * NK) == 0) {
-//			if (NK == 1 && last_error < 550) {
-//				tfp1->setTrainSpeed(0.01);
-//				tfp2->setTrainSpeed(0.01);
-//				NK = 10;
-//			}
+		if (i % (10000 * NK) == 0) {
 			cout << "Error: " << last_error << "\n";
 		}
 	}
@@ -83,10 +78,8 @@ void step() {
 	float out_data = 0;
 	float internal_data[INTERNAL_LAYER_LENGTH];
 	tfp1->train(*cfp1, &in_data, internal_data);
-	tfp2->train(*cfp2, internal_data, &out_data);
-	float error_data = err(out_data, etalon);
-	float err_diff_data = err_diff(out_data, etalon);
-	tfp2->fix(*cfp2, &err_diff_data, internal_data);
+	tfp2->train(*cfp2, internal_data, &out_data, &etalon);
+	tfp2->fix(*cfp2, nullptr, internal_data);
 	tfp1->fix(*cfp1, internal_data, nullptr);
 }
 
@@ -98,7 +91,7 @@ float show_error() {
 		float out, etl = test_func(arg);
 		calc1->calculate(&arg, tmp);
 		calc2->calculate(tmp, &out);
-		float oo = abs(out - etl) / abs(etl);
+		float oo = (out - etl);
 		sko += oo * oo;
 		count++;
 	}

@@ -92,7 +92,7 @@ namespace l4ai::algs {
 		}
 	protected:
 
-		virtual bool train(trainer_context_t& context, value_t* in_data, value_t* out_data) const override final {
+		virtual bool train(trainer_context_t& context, value_t* in_data, value_t* out_data, value_t* etalon = nullptr) const override final {
 			if (context.target != AlgorithmType::Perceptron) throw runtime_error("Функция обучения перцептрона получила неверный контекст."s);
 			perceptron_context_t& pcntx = static_cast<perceptron_context_t&>(context);
 			value_t* out_diff_summ = pcntx.out_diff_summ;
@@ -158,10 +158,12 @@ namespace l4ai::algs {
 					break;
 			}
 			memcpy(pcntx.in_data, in_data, in_length);
+			if (etalon != nullptr)
+				trainer_t::error_diff_function(out_length, etalon, out_data, out_diff_summ, true);
 			return result;
 		}
 
-		virtual void fix(trainer_context_t& context, value_t* err_diff_out, value_t* err_diff_in = nullptr) override final {
+		virtual void fix(trainer_context_t& context, value_t* err_diff_out = nullptr, value_t* err_diff_in = nullptr) override final {
 			if (context.target != AlgorithmType::Perceptron) throw runtime_error("Функция обучения перцептрона получила неверный контекст."s);
 			perceptron_context_t& pcntx = static_cast<perceptron_context_t&>(context);
 			const FlatPerceptron& alg = getFlatPerceptron();
@@ -177,23 +179,29 @@ namespace l4ai::algs {
 			if (err_diff_in != nullptr) {
 				memset(err_diff_in, 0, in_length * sizeof(value_t));
 				for(size_t i = 0; i < out_length; ++i) {
-					value_t err_diff_summ_i = err_diff_out[i] * pcntx.out_diff_summ[i];
+					value_t err_diff_summ_i = err_diff_out == nullptr ? pcntx.out_diff_summ[i] : err_diff_out[i] * pcntx.out_diff_summ[i];
 					value_t* wcol = inst.getWeightColumn(i);
 					for(size_t j = 0; j < avl_rows_count; ++j) {
 						size_t in_index = (j + rows_offset)  % in_length;
 						err_diff_in[in_index] += wcol[j] * err_diff_summ_i;
 						wcol[j] -= err_diff_summ_i * in_data[in_index] * speed;
 					}
+					if (use_shift) {
+						wcol[rows_count - 1] -= err_diff_summ_i * speed;
+					}
 					rows_offset += alg.getRowsOffset();
 					rows_offset = rows_offset % in_length;
 				}
 			} else {
 				for(size_t i = 0; i < out_length; ++i) {
-					value_t err_diff_summ_i = err_diff_out[i] * pcntx.out_diff_summ[i];
+					value_t err_diff_summ_i = err_diff_out == nullptr ? pcntx.out_diff_summ[i] : err_diff_out[i] * pcntx.out_diff_summ[i];
 					value_t* wcol = inst.getWeightColumn(i);
 					for(size_t j = 0; j < avl_rows_count; ++j) {
 						size_t in_index = (j + rows_offset)  % in_length;
 						wcol[j] -= err_diff_summ_i * in_data[in_index] * speed;
+					}
+					if (use_shift) {
+						wcol[rows_count - 1] -= err_diff_summ_i * speed;
 					}
 					rows_offset += alg.getRowsOffset();
 					rows_offset = rows_offset % in_length;

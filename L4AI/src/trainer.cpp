@@ -10,10 +10,10 @@
 namespace l4ai::algs {
 
 	template<>
-	const float Trainer<float>::default_train_speed = 0.1f;
+	const float Trainer<float>::default_train_speed = 0.01f;
 
 	template<>
-	const double Trainer<double>::default_train_speed = 0.1;
+	const double Trainer<double>::default_train_speed = 0.01;
 
 	template class Trainer<float>;
 	template class Trainer<double>;

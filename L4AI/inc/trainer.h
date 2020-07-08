@@ -41,12 +41,14 @@ namespace l4ai::algs {
 			using instance_t = Instance<value_t>;
 			using instance_ptr_t = ptr_t<instance_t>;
 			using error_function_t = value_t (*)(size_t count, const value_t* origin, const value_t* calculate);
+			using error_diff_function_t = void (*)(size_t count, const value_t* origin, const value_t* calculate, value_t* target, bool multiply);
 			using trainer_context_t = ITrainerContext<value_t>;
 			static const value_t default_train_speed;
 		protected:
 			instance_ptr_t instance;
 			const ErrorFunctionType error_function_type;
 			const error_function_t error_function;
+			const error_diff_function_t error_diff_function;
 			/**
 			 * @brief Последнее значение ошибки. То есть значение ошибки полученное при последнем запуске @link l4ai::algs::Trainer::toTrain @endlink.
 			 */
@@ -85,7 +87,7 @@ namespace l4ai::algs {
 			 * @param out_data 		Должен указывать на массив в который будут помещены результаты вычислений, необходимые для вычисления функции ошибки и, возможно, для следующего алгоритма в цепочке, если используется цепочка алгоритмов.
 			 * 						Длинна массива должна соответствовать размеру выходных данных в спецификации алгоритма.
 			 */
-			virtual bool train(trainer_context_t& context, value_t* in_data, value_t* out_data) const = 0;
+			virtual bool train(trainer_context_t& context, value_t* in_data, value_t* out_data, value_t* etalon = nullptr) const = 0;
 
 			/**
 			 * @brief Корректирует параметры алгоритма, учитывая производную функции ошибки по выходным данным (@codeline err_diff_out @endcode) и ранее вычисленные значения внутренних производных, передаваемые через контекст (@codeline context @endcode).
@@ -96,7 +98,7 @@ namespace l4ai::algs {
 			 * @param err_diff_in	Указатель на массив, в который будет сохранена производная функции ошибки по входным данным.
 			 * 						Если данный аргумент равен @codeline nullptr @endcode, то вычисление производной функции ошибки по входным данным не выполняется.
 			 */
-			virtual void fix(trainer_context_t& context, value_t* err_diff_out, value_t* err_diff_in = nullptr) = 0;
+			virtual void fix(trainer_context_t& context, /*in*/ value_t* err_diff_out = nullptr, /*out*/ value_t* err_diff_in = nullptr) = 0;
 			static trainer_ptr_t make(instance_ptr_t&& inst, std::optional<ErrorFunctionType> error_function_type = std::nullopt);
 		};
 

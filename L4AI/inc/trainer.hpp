@@ -19,6 +19,9 @@ namespace l4ai::algs {
 	using error_function_t = typename Trainer<TValue>::error_function_t;
 
 	template<typename TValue>
+	using error_diff_function_t = typename Trainer<TValue>::error_diff_function_t;
+
+	template<typename TValue>
 	ITrainerContext<TValue>::ITrainerContext(AlgorithmType target) : target(target) {}
 
 	template<typename TValue>
@@ -34,7 +37,7 @@ namespace l4ai::algs {
 					value_t result = value_t();
 					for(size_t i = 0; i < count; ++i) {
 						value_t diff = origin[i] - calculate[i];
-						result = diff * diff;
+						result += diff * diff;
 					}
 					result = result / count;
 					return result;
@@ -43,11 +46,48 @@ namespace l4ai::algs {
 				return [](size_t count, const value_t* origin, const value_t* calculate)->value_t{
 					value_t result = value_t();
 					for(size_t i = 0; i < count; ++i) {
-						value_t diff = abs(origin[i] - calculate[i]);
-						result = diff;
+						value_t diff = origin[i] - calculate[i];
+						result += abs(diff);
 					}
 					result = result / count;
 					return result;
+				};
+			default:
+				throw runtime_error("no implement this error function.");
+		}
+	}
+
+	template<typename TValue>
+	error_diff_function_t<TValue> getErrorDiffFunction(ErrorFunctionType error_function_type) {
+		using value_t = TValue;
+		switch (error_function_type) {
+			case ErrorFunctionType::StandardDeviationSquare:
+				return [](size_t count, const value_t* origin, const value_t* calculate, value_t* target, bool multiply)->void{
+					if (multiply) {
+						for(size_t i = 0; i < count; ++i) {
+							value_t diff = origin[i] - calculate[i];
+							target[i] *= - 2 * diff / count;
+						}
+					} else {
+						for(size_t i = 0; i < count; ++i) {
+							value_t diff = origin[i] - calculate[i];
+							target[i] = - 2 * diff / count;
+						}
+					}
+				};
+			case ErrorFunctionType::ArithmeticMeanAbsoluteDeviation:
+				return [](size_t count, const value_t* origin, const value_t* calculate, value_t* target, bool multiply)->void{
+					if (multiply) {
+						for(size_t i = 0; i < count; ++i) {
+							value_t diff = origin[i] - calculate[i];
+							target[i] *= ((diff == 0) ? 0 : (diff / abs(diff))) / count;
+						}
+					} else {
+						for(size_t i = 0; i < count; ++i) {
+							value_t diff = origin[i] - calculate[i];
+							target[i] = ((diff == 0) ? 0 : (diff / abs(diff))) / count;
+						}
+					}
 				};
 			default:
 				throw runtime_error("no implement this error function.");
@@ -59,6 +99,7 @@ namespace l4ai::algs {
 		: instance(move(instance)),
 		  error_function_type(error_function_type ? *error_function_type : ErrorFunctionType::StandardDeviationSquare),
 		  error_function(getErrorFunction<TValue>(this->error_function_type)),
+		  error_diff_function(getErrorDiffFunction<TValue>(this->error_function_type)),
 		  last_error_value(),
 		  float_average_error(),
 		  train_speed(default_train_speed)
