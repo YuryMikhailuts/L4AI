@@ -1,3 +1,13 @@
+/*
+ * L4AI_global.h
+ *
+ *  Создано российским программистом на территории Российской Федерации.
+ *  (Created by a Russian programmer on the Russian Federation.)
+ *
+ *  Дата создания (Created): 9 июл. 2020 г.
+ *  Разработчик (Developer): Михайлуц Юрий Вычеславович (aracks@yandex.ru)
+ */
+
 #ifndef L4AI_GLOBAL_H
 #define L4AI_GLOBAL_H
 
