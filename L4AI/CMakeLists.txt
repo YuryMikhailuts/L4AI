@@ -12,6 +12,7 @@ set(L4AI_SOURCES
 	"src/pipe.cpp"
 	"src/calculator.cpp"
 	"src/trainer.cpp"
+	"src/pipeline.cpp"
 )
 
 if (L4AI_BUILD_STATIC)
