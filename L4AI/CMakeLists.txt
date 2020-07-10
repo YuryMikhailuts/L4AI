@@ -13,6 +13,7 @@ set(L4AI_SOURCES
 	"src/calculator.cpp"
 	"src/trainer.cpp"
 	"src/pipeline.cpp"
+	"src/perceptroninstance.cpp"
 )
 
 if (L4AI_BUILD_STATIC)
