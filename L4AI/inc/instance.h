@@ -19,6 +19,7 @@ namespace l4ai::algs {
 	class Instance {
 	public:
 		using value_t = TValue;
+		using instance_t = Instance<TValue>;
 	private:
 		std::unique_ptr<Algorithm> algorithm;
 	protected:
@@ -26,6 +27,8 @@ namespace l4ai::algs {
 		Instance ( Algorithm*&& algorithm );
 	public:
 		const Algorithm& getAlgorithm() const;
+		static std::shared_ptr<instance_t> make(std::unique_ptr<Algorithm>&& algorithm);
+		static std::shared_ptr<instance_t> make(Algorithm*&& algorithm);
 	};
 
 	using InstanceF32 = Instance<float>;
