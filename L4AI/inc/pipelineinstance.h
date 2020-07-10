@@ -23,9 +23,13 @@ namespace l4ai::algs {
 		using value_t = typename instance_t::value_t;
 	private:
 		instance_t** layers;
+		static instance_t** makeLayers(PipeLine& algorithm);
 	public:
 		PipeLineInstance ( std::unique_ptr<PipeLine>&& algorithm );
 		PipeLineInstance ( PipeLine*&& algorithm );
+		size_t getLayersCount() const;
+		instance_t& getLayer(size_t index);
+		const instance_t& getLayer(size_t index) const;
 	};
 
 }

@@ -25,8 +25,8 @@ namespace l4ai::algs {
 	public:
 		Pipe();
 		Pipe(size_t layer_count);
-		size_t getLayerCount() const;
-		void setLayerCount(size_t value);
+		size_t getLayersCount() const;
+		void setLayersCount(size_t value);
 		inline PipeType getPipeType() const { return Pipe::type; }
 	};
 

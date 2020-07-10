@@ -26,12 +26,12 @@ namespace l4ai::algs {
 	const Algorithm& Instance<TValue>::getAlgorithm() const { return *algorithm; }
 
 	template<typename TValue>
-	std::shared_ptr<Instance<TValue>> Instance<TValue>::make(std::unique_ptr<Algorithm>&& algorithm) {
+	std::unique_ptr<Instance<TValue>> Instance<TValue>::make(std::unique_ptr<Algorithm>&& algorithm) {
 		return make(move(&*algorithm));
 	}
 
 	template<typename TValue>
-	std::shared_ptr<Instance<TValue>> Instance<TValue>::make(Algorithm*&& algorithm) {
+	std::unique_ptr<Instance<TValue>> Instance<TValue>::make(Algorithm*&& algorithm) {
 		Instance<TValue>* result = nullptr;
 		switch (algorithm->type()) {
 			case AlgorithmType::Perceptron: {
@@ -54,7 +54,7 @@ namespace l4ai::algs {
 				break;
 			}
 		}
-		return std::shared_ptr<Instance<TValue>>(result);
+		return std::unique_ptr<Instance<TValue>>(result);
 	}
 }
 

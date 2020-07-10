@@ -18,11 +18,11 @@ namespace l4ai::algs {
 
 	Pipe::Pipe() : Pipe(size_t()) {}
 
-	size_t Pipe::getLayerCount() const {
+	size_t Pipe::getLayersCount() const {
 		return layer_count;
 	}
 
-	void Pipe::setLayerCount(size_t value) {
+	void Pipe::setLayersCount(size_t value) {
 		layer_count = value;
 	}
 

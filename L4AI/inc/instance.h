@@ -27,8 +27,8 @@ namespace l4ai::algs {
 		Instance ( Algorithm*&& algorithm );
 	public:
 		const Algorithm& getAlgorithm() const;
-		static std::shared_ptr<instance_t> make(std::unique_ptr<Algorithm>&& algorithm);
-		static std::shared_ptr<instance_t> make(Algorithm*&& algorithm);
+		static std::unique_ptr<instance_t> make(std::unique_ptr<Algorithm>&& algorithm);
+		static std::unique_ptr<instance_t> make(Algorithm*&& algorithm);
 	};
 
 	using InstanceF32 = Instance<float>;
