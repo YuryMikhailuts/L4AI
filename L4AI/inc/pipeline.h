@@ -16,10 +16,15 @@ namespace l4ai::algs {
 
 	class L4AI_EXPORT PipeLine : public Pipe {
 	private:
-		Algorithm* layers;
+		Algorithm** layers;
 	public:
 		PipeLine();
 		PipeLine(size_t layer_count, Algorithm* const layers = nullptr);
+
+		bool isEmptyLayer(size_t index);
+		Algorithm& getLayer(size_t index);
+		const Algorithm& getLayer(size_t index) const;
+		void setLayer(size_t index, Algorithm* algorithm);
 	};
 
 }
