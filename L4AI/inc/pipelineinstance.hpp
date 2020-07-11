@@ -23,7 +23,7 @@ namespace l4ai::algs {
 		: PipeLineInstance(move(std::unique_ptr<PipeLine>(algorithm))) {}
 
 	template<typename TValue>
-	static Instance<TValue>** PipeLineInstance<TValue>::makeLayers(PipeLine& algorithm) {
+	Instance<TValue>** PipeLineInstance<TValue>::makeLayers(PipeLine& algorithm) {
 		size_t count = algorithm.getLayersCount();
 		instance_t** layers = new instance_t*[count];
 		for(size_t i = 0; i < count; ++i) {
@@ -34,17 +34,17 @@ namespace l4ai::algs {
 
 	template<typename TValue>
 	size_t PipeLineInstance<TValue>::getLayersCount() const {
-		return static_cast<const PipeLine&>(*Instance<TValue>::algorithm).getLayersCount();
+		return static_cast<const PipeLine&>(Instance<TValue>::getAlgorithm()).getLayersCount();
 	}
 
 	template<typename TValue>
 	Instance<TValue>& PipeLineInstance<TValue>::getLayer(size_t index) {
-		return layers[index];
+		return *layers[index];
 	}
 
 	template<typename TValue>
 	const Instance<TValue>& PipeLineInstance<TValue>::getLayer(size_t index) const {
-		return layers[index];
+		return *layers[index];
 	}
 
 }

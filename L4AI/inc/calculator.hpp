@@ -14,6 +14,7 @@
 #include <calculator.h>
 #include <perceptron.h>
 #include <perceptroncalculator.hpp>
+#include <pipelinecalculator.hpp>
 
 namespace l4ai::algs {
 	using namespace std;

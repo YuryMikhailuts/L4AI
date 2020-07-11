@@ -32,6 +32,9 @@ namespace l4ai::algs {
 		const instance_t& getLayer(size_t index) const;
 	};
 
+	using PipeLineInstanceF32 = PipeLineInstance<float>;
+	using PipeLineInstanceF64 = PipeLineInstance<double>;
+
 }
 
 #endif /* L4AI_INC_PIPELINEINSTANCE_H_ */
