@@ -42,6 +42,8 @@ calculator_ptr_t calc1, calc2;
 
 static constexpr size_t INTERNAL_LAYER_LENGTH = 20;
 
+#include <time.h>
+
 int main() {
 	std::shared_ptr<PerceptronInstF32> ifp1 = makeFP(1, INTERNAL_LAYER_LENGTH, ActivationFunctions::ArcTangent);
 	std::shared_ptr<PerceptronInstF32> ifp2 = makeFP(INTERNAL_LAYER_LENGTH, 1, ActivationFunctions::Trivial);

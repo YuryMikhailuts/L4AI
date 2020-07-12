@@ -41,8 +41,15 @@ namespace l4ai::algs {
 				}
 			}
 			case AlgorithmType::Pipe:
-				return calculator_ptr_t(nullptr);
-				break;
+				const Pipe& pipe = static_cast<const Pipe&>(alg);
+				switch (pipe.getPipeType()) {
+					case PipeType::Line:
+						return calculator_ptr_t(new PipeLineCalculator<TValue>(move(inst)));
+						break;
+					default:
+						return calculator_ptr_t(nullptr);
+						break;
+				}
 			default:
 				return calculator_ptr_t(nullptr);
 				break;

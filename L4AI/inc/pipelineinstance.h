@@ -21,15 +21,21 @@ namespace l4ai::algs {
 	public:
 		using instance_t = Instance<TValue>;
 		using value_t = typename instance_t::value_t;
+		template<typename T>
+		using ptr_t = std::shared_ptr<T>;
+		template<typename T>
+		using array_ptr_t = std::shared_ptr<T[]>;
+		using instance_ptr_t = ptr_t<instance_t>;
 	private:
-		instance_t** layers;
-		static instance_t** makeLayers(PipeLine& algorithm);
+		array_ptr_t<instance_ptr_t> layers;
+		static array_ptr_t<instance_ptr_t> makeLayers(PipeLine& algorithm);
 	public:
 		PipeLineInstance ( std::unique_ptr<PipeLine>&& algorithm );
 		PipeLineInstance ( PipeLine*&& algorithm );
 		size_t getLayersCount() const;
 		instance_t& getLayer(size_t index);
 		const instance_t& getLayer(size_t index) const;
+		instance_ptr_t getLayerPtr(size_t index);
 	};
 
 	using PipeLineInstanceF32 = PipeLineInstance<float>;

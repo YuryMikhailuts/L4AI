@@ -10,24 +10,25 @@
 
 #include <pipelineinstance.h>
 #include <pipe.h>
+#include <memory>
 
 namespace l4ai::algs {
 	using namespace std;
 
 	template<typename TValue>
 	PipeLineInstance<TValue>::PipeLineInstance ( std::unique_ptr<PipeLine>&& algorithm )
-		: instance_t::Instance(move(algorithm)), layers(makeLayers(*algorithm)) {}
+		: instance_t::Instance(move(algorithm)), layers(move(makeLayers(*algorithm))) {}
 
 	template<typename TValue>
 	PipeLineInstance<TValue>::PipeLineInstance ( PipeLine*&& algorithm )
 		: PipeLineInstance(move(std::unique_ptr<PipeLine>(algorithm))) {}
 
 	template<typename TValue>
-	Instance<TValue>** PipeLineInstance<TValue>::makeLayers(PipeLine& algorithm) {
+	shared_ptr<shared_ptr<Instance<TValue>>[]> PipeLineInstance<TValue>::makeLayers(PipeLine& algorithm) {
 		size_t count = algorithm.getLayersCount();
-		instance_t** layers = new instance_t*[count];
+		array_ptr_t<instance_ptr_t> layers (new instance_ptr_t[count]);
 		for(size_t i = 0; i < count; ++i) {
-			layers[i] = instance_t::make(&algorithm.getLayer(i)).release();
+			layers[i] = move(instance_ptr_t(instance_t::make(&algorithm.getLayer(i))));
 		}
 		return layers;
 	}
@@ -45,6 +46,11 @@ namespace l4ai::algs {
 	template<typename TValue>
 	const Instance<TValue>& PipeLineInstance<TValue>::getLayer(size_t index) const {
 		return *layers[index];
+	}
+
+	template<typename TValue>
+	shared_ptr<Instance<TValue>> PipeLineInstance<TValue>::getLayerPtr(size_t index) {
+		return layers[index];
 	}
 
 }
