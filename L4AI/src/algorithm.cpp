@@ -41,4 +41,5 @@ namespace l4ai::algs {
 	Algorithm::Algorithm ( size_t input_length, size_t output_length )
 		: input_length(input_length), output_length(output_length), alg_type(AlgorithmType::Unknown) {}
 
+	Algorithm::~Algorithm() {}
 } // l4ai

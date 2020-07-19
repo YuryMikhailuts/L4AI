@@ -23,10 +23,12 @@ namespace l4ai::algs {
 	private:
 		std::unique_ptr<Algorithm> algorithm;
 	protected:
-		Instance ( std::unique_ptr<Algorithm>&& algorithm );
-		Instance ( Algorithm*&& algorithm );
+		Instance ( std::unique_ptr<Algorithm>&& _algorithm );
+		Instance ( Algorithm* _algorithm );
 	public:
+		virtual ~Instance();
 		const Algorithm& getAlgorithm() const;
+		Algorithm& getAlgorithm();
 		static std::unique_ptr<instance_t> make(std::unique_ptr<Algorithm>&& algorithm);
 		static std::unique_ptr<instance_t> make(Algorithm*&& algorithm);
 	};

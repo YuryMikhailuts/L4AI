@@ -14,6 +14,7 @@
 #include <algorithm.h>
 #include <perceptron.h>
 #include <perceptrontrainer.hpp>
+#include <pipelinetrainer.hpp>
 
 namespace l4ai::algs {
 	using namespace std;
@@ -113,7 +114,7 @@ namespace l4ai::algs {
 	Trainer<TValue>::~Trainer() {}
 
 	template<typename TValue>
-	typename Trainer<TValue>::trainer_ptr_t Trainer<TValue>::make(instance_ptr_t&& inst, std::optional<ErrorFunctionType> error_function_type) {
+	typename Trainer<TValue>::trainer_ptr_t Trainer<TValue>::make(instance_ptr_t inst, std::optional<ErrorFunctionType> error_function_type) {
 		instance_t& instance = *inst;
 		auto& alg = instance.getAlgorithm();
 		switch (alg.type()) {
@@ -126,9 +127,16 @@ namespace l4ai::algs {
 						return trainer_ptr_t(nullptr);
 				}
 			}
-			case AlgorithmType::Pipe:
-				return trainer_ptr_t(nullptr);
+			case AlgorithmType::Pipe: {
+				const Pipe& pipe = static_cast<const Pipe&>(alg);
+				switch (pipe.getPipeType()) {
+					case PipeType::Line:
+						return trainer_ptr_t(new PipeLineTrainer<TValue>(move(inst)));
+					default:
+						return trainer_ptr_t(nullptr);
+				}
 				break;
+			}
 			default:
 				return trainer_ptr_t(nullptr);
 				break;

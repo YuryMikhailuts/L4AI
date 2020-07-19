@@ -29,6 +29,8 @@ namespace l4ai::algs {
 	private:
 		array_ptr_t<instance_ptr_t> layers;
 		static array_ptr_t<instance_ptr_t> makeLayers(PipeLine& algorithm);
+		const PipeLine& getPipeLine() const;
+		PipeLine& getPipeLine();
 	public:
 		PipeLineInstance ( std::unique_ptr<PipeLine>&& algorithm );
 		PipeLineInstance ( PipeLine*&& algorithm );

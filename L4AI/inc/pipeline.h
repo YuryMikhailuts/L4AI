@@ -19,7 +19,7 @@ namespace l4ai::algs {
 		Algorithm** layers;
 	public:
 		PipeLine();
-		PipeLine(size_t layer_count, Algorithm* const layers = nullptr);
+		PipeLine(size_t layer_count, Algorithm**const layers = nullptr);
 
 		bool isEmptyLayer(size_t index);
 		Algorithm& getLayer(size_t index);

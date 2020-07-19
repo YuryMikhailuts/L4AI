@@ -27,7 +27,7 @@ namespace l4ai::algs {
 	Calculator<TValue>::~Calculator() {}
 
 	template<typename TValue>
-	typename Calculator<TValue>::calculator_ptr_t Calculator<TValue>::make(instance_ptr_t&& inst) {
+	typename Calculator<TValue>::calculator_ptr_t Calculator<TValue>::make(instance_ptr_t inst) {
 		instance_t& instance = *inst;
 		auto& alg = instance.getAlgorithm();
 		switch (alg.type()) {
@@ -40,16 +40,15 @@ namespace l4ai::algs {
 						return calculator_ptr_t(nullptr);
 				}
 			}
-			case AlgorithmType::Pipe:
+			case AlgorithmType::Pipe: {
 				const Pipe& pipe = static_cast<const Pipe&>(alg);
 				switch (pipe.getPipeType()) {
 					case PipeType::Line:
 						return calculator_ptr_t(new PipeLineCalculator<TValue>(move(inst)));
-						break;
 					default:
 						return calculator_ptr_t(nullptr);
-						break;
 				}
+			}
 			default:
 				return calculator_ptr_t(nullptr);
 				break;

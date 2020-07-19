@@ -102,7 +102,7 @@ namespace l4ai::algs {
 			 * 						Если данный аргумент равен @codeline nullptr @endcode, то вычисление производной функции ошибки по входным данным не выполняется.
 			 */
 			virtual void fix(trainer_context_t& context, /*in*/ value_t* err_diff_out = nullptr, /*out*/ value_t* err_diff_in = nullptr) = 0;
-			static trainer_ptr_t make(instance_ptr_t&& inst, std::optional<ErrorFunctionType> error_function_type = std::nullopt);
+			static trainer_ptr_t make(instance_ptr_t inst, std::optional<ErrorFunctionType> error_function_type = std::nullopt);
 		};
 
 } /* namespace l4ai::algs */

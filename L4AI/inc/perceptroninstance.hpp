@@ -11,7 +11,7 @@
 #ifndef PERCEPTRONINSTANCE_HPP
 #define PERCEPTRONINSTANCE_HPP
 #include <perceptroninstance.h>
-
+#include <math.h>
 
 namespace l4ai::algs {
 	using namespace std;
@@ -21,7 +21,13 @@ namespace l4ai::algs {
 		: Instance<TValue>::Instance(move(perceptron)),
 		  cols_count(getPerceptron().getWeightsColumns()),
 		  rows_count(getPerceptron().getWeightsRows()),
-		  weights(new value_t[cols_count * rows_count]) {}
+		  weights(new value_t[cols_count * rows_count]) {
+		for(size_t c = 0; c < cols_count; ++c) {
+			for(size_t r = 0; r < rows_count; ++r) {
+				getWeight(r, c) = (((double)rand()) / RAND_MAX) * 2 - 1;
+			}
+		}
+	}
 
 	template<typename TValue>
 	PerceptronInstance<TValue>::~PerceptronInstance() {

@@ -44,18 +44,7 @@ namespace l4ai::algs {
 			return max_length;
 		}
 
-		static value_t** makeInternalData(size_t max_length) {
-			if (max_length > 0) {
-				value_t** internal_data = new value_t*[2];
-				internal_data[0] = new value_t[max_length];
-				internal_data[1] = new value_t[max_length];
-				return internal_data;
-			} else {
-				return nullptr;
-			}
-		}
-
-		static array_ptr_t<calculator_ptr_t> makeInternalCalculators(const PipeLineInstance<TValue>& instance) {
+		static array_ptr_t<calculator_ptr_t> makeInternalCalculators(PipeLineInstance<TValue>& instance) {
 			size_t internal_calculator_count = instance.getLayersCount();
 			if (internal_calculator_count > 0) {
 				array_ptr_t<calculator_ptr_t> internal_calculators (new calculator_ptr_t[internal_calculator_count]);
@@ -71,6 +60,11 @@ namespace l4ai::algs {
 		const PipeLineInstance<TValue>& getPipeLineInstance() const {
 			const Instance<TValue>& inst = *calculator_t::instance;
 			return static_cast<const PipeLineInstance<TValue>&>(inst);
+		}
+
+		PipeLineInstance<TValue>& getPipeLineInstance() {
+			Instance<TValue>& inst = *calculator_t::instance;
+			return static_cast<PipeLineInstance<TValue>&>(inst);
 		}
 
 		virtual bool calculate(value_t* in_data, value_t* out_data) const override {
@@ -95,7 +89,7 @@ namespace l4ai::algs {
 		PipeLineCalculator(instance_ptr_t&& instance) :
 			calculator_t::Calculator(move(instance)),
 			max_layer_length(findMaxLength(getPipeLineInstance())),
-			internal_data(max_layer_length),
+			internal_data{ new value_t[max_layer_length], new value_t[max_layer_length]},
 			internal_calculators(makeInternalCalculators(getPipeLineInstance())) {}
 	};
 

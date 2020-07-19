@@ -35,7 +35,7 @@ namespace l4ai::algs {
 		 * @remark Значение @codeline false @endcode возвращается только в случае, если произошли логические ошибки, такие как деление на 0 (если это запрещено для выбранного типа данных). В случае же критических ошибок, таких как разыменование нуля или переполнение стека, даный метод будет бросать исключения, как и все нормальные люди (т.е. методы).
 		 */
 		virtual bool calculate(value_t* in_data, value_t* out_data) const = 0;
-		static calculator_ptr_t make(instance_ptr_t&& inst);
+		static calculator_ptr_t make(instance_ptr_t inst);
 	};
 
 	using CalculatorF32 = Calculator<float>;

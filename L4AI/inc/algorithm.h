@@ -44,6 +44,7 @@ namespace l4ai::algs {
 	public:
 		Algorithm();
 		Algorithm ( size_t input_length, size_t output_length );
+		virtual ~Algorithm();
 
 		size_t getInputLength() const;
 		void setInputLength ( const size_t& value );

@@ -17,11 +17,21 @@ namespace l4ai::algs {
 
 	template<typename TValue>
 	PipeLineInstance<TValue>::PipeLineInstance ( std::unique_ptr<PipeLine>&& algorithm )
-		: instance_t::Instance(move(algorithm)), layers(move(makeLayers(*algorithm))) {}
+		: instance_t::Instance(std::unique_ptr<Algorithm>(algorithm.release())), layers(move(makeLayers(getPipeLine()))) {}
 
 	template<typename TValue>
 	PipeLineInstance<TValue>::PipeLineInstance ( PipeLine*&& algorithm )
 		: PipeLineInstance(move(std::unique_ptr<PipeLine>(algorithm))) {}
+
+	template<typename TValue>
+	const PipeLine& PipeLineInstance<TValue>::getPipeLine() const {
+		return static_cast<const PipeLine&>(instance_t::getAlgorithm());
+	}
+
+	template<typename TValue>
+	PipeLine& PipeLineInstance<TValue>::getPipeLine() {
+		return static_cast<PipeLine&>(instance_t::getAlgorithm());
+	}
 
 	template<typename TValue>
 	shared_ptr<shared_ptr<Instance<TValue>>[]> PipeLineInstance<TValue>::makeLayers(PipeLine& algorithm) {

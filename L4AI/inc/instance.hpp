@@ -18,12 +18,17 @@
 namespace l4ai::algs {
 	using namespace std;
 
-	template<typename TValue> Instance<TValue>::Instance ( unique_ptr<Algorithm>&& algorithm ) : algorithm ( move ( algorithm ) ) {}
+	template<typename TValue> Instance<TValue>::Instance ( unique_ptr<Algorithm>&& _algorithm ) : algorithm ( move ( _algorithm ) ) {}
 
-	template<typename TValue> Instance<TValue>::Instance ( Algorithm*&& algorithm ) : algorithm ( move ( algorithm ) ) { algorithm = nullptr; }
+	template<typename TValue> Instance<TValue>::Instance ( Algorithm* _algorithm ) : algorithm ( move ( _algorithm ) ) { }
+
+	template<typename TValue> Instance<TValue>::~Instance() {}
 
 	template<typename TValue>
 	const Algorithm& Instance<TValue>::getAlgorithm() const { return *algorithm; }
+
+	template<typename TValue>
+	Algorithm& Instance<TValue>::getAlgorithm() { return *algorithm; }
 
 	template<typename TValue>
 	std::unique_ptr<Instance<TValue>> Instance<TValue>::make(std::unique_ptr<Algorithm>&& algorithm) {
