@@ -21,6 +21,9 @@ namespace l4ai::algs {
 	using namespace std;
 
 	template<typename TValue>
+	inline static constexpr TValue square(TValue value) { return value * value; }
+
+	template<typename TValue>
 	class PerceptronExecutorBase {
 	public:
 		using value_t = TValue;
@@ -33,6 +36,8 @@ namespace l4ai::algs {
 				case ActivationFunctions::ReLU: return [](const value_t*src, value_t*dst, size_t len) { for(size_t i = 0; i < len; ++i) dst[i] =  (src[i] < 0) ? 0 : src[i]; };
 				case ActivationFunctions::HyperbolicTangent: return [](const value_t*src, value_t*dst, size_t len) { for(size_t i = 0; i < len; ++i) dst[i] = (exp(src[i]) - exp(-1)) / (exp(src[i]) + exp(-src[i])); };
 				case ActivationFunctions::Logistic: return [](const value_t*src, value_t*dst, size_t len) { for(size_t i = 0; i < len; ++i) dst[i] = 1 / (1 + exp(-src[i])); };
+				case ActivationFunctions::Gauss: return [](const value_t*src, value_t*dst, size_t len) { for(size_t i = 0; i < len; ++i) dst[i] = exp(-square(src[i])); };
+				case ActivationFunctions::FakeGauss: return [](const value_t*src, value_t*dst, size_t len) { for(size_t i = 0; i < len; ++i) dst[i] = 1 / (1 + square(src[i])); };
 				case ActivationFunctions::Trivial: [[fallthrough]];
 				default: return [](const value_t*src, value_t*dst, size_t len){ for(size_t i = 0; i < len; ++i) dst[i] = src[i]; };
 			}
@@ -43,6 +48,8 @@ namespace l4ai::algs {
 				case ActivationFunctions::ReLU: return [](const value_t*src, value_t*dst, size_t len) { for(size_t i = 0; i < len; ++i) dst[i] =  (src[i] < 0) ? 0 : 1; };
 				case ActivationFunctions::HyperbolicTangent: return [](const value_t*src, value_t*dst, size_t len) { for(size_t i = 0; i < len; ++i) dst[i] = 1 - src[i] * src[i]; };
 				case ActivationFunctions::Logistic: return [](const value_t*src, value_t*dst, size_t len) { for(size_t i = 0; i < len; ++i) dst[i] = src[i] * (1 - src[i]); };
+				case ActivationFunctions::Gauss: return [](const value_t*src, value_t*dst, size_t len) { for(size_t i = 0; i < len; ++i) dst[i] = -2 * src[i] * exp(-square(src[i])); };
+				case ActivationFunctions::FakeGauss: return [](const value_t*src, value_t*dst, size_t len) { for(size_t i = 0; i < len; ++i) dst[i] = -2 * src[i] / square(1 + square(src[i])); };
 				case ActivationFunctions::Trivial: [[fallthrough]];
 				default: return [](const value_t*src, value_t*dst, size_t len){ for(size_t i = 0; i < len; ++i) dst[i] = src[i]; };
 			}
@@ -52,6 +59,8 @@ namespace l4ai::algs {
 				case ActivationFunctions::ArcTangent: [[fallthrough]];
 				case ActivationFunctions::ReLU: return activation_diff_type_t::ByArgument;
 				case ActivationFunctions::HyperbolicTangent: [[fallthrough]];
+				case ActivationFunctions::Gauss: [[fallthrough]];
+				case ActivationFunctions::FakeGauss: [[fallthrough]];
 				case ActivationFunctions::Logistic: return activation_diff_type_t::ByValue;
 				case ActivationFunctions::Trivial: [[fallthrough]];
 				default: return activation_diff_type_t::AlwaysOne;

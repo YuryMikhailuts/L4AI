@@ -43,14 +43,14 @@ trainer_ptr_t trainer;
 context_ptr_t context;
 calculator_ptr_t calculator;
 
-static constexpr size_t INTERNAL_LAYER_LENGTH = 20;
+static constexpr size_t INTERNAL_LAYER_LENGTH = 500;
 
 #include <time.h>
 
 int main() {
 	std::shared_ptr<InstanceF32> instance (InstanceF32::make(
 		makePL({
-			makeFP(1, INTERNAL_LAYER_LENGTH, ActivationFunctions::ArcTangent),
+			makeFP(1, INTERNAL_LAYER_LENGTH, ActivationFunctions::FakeGauss),
 			makeFP(INTERNAL_LAYER_LENGTH, 1, ActivationFunctions::Trivial)
 		})
 	));
@@ -113,8 +113,8 @@ float test_func(float arg) {
 }
 
 float frnd(float min, float max) {
-	static constexpr double DIVIDOR = double(int64_t(RAND_MAX));
-	int64_t result = rand();
+	static constexpr int64_t DIVIDOR = 10;//double(int64_t(RAND_MAX));
+	double result = rand() % DIVIDOR;
 	return (result / DIVIDOR) * (max - min) + min;
 }
 

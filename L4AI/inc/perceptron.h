@@ -41,7 +41,15 @@ namespace l4ai::algs {
 		/**
 		 * @brief f(x) = arctg(x)
 		 */
-		ArcTangent
+		ArcTangent,
+		/**
+		 * @brief f(x) = exp(-x*x)
+		 */
+		Gauss,
+		/**
+		 * @brief f(x) = 1/(1 + x*x)
+		 */
+		FakeGauss
 	};
 
 	/**
