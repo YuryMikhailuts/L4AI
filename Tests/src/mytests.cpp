@@ -1,5 +1,5 @@
 /*
- * testbase.cpp
+ * mytests.cpp
  *
  *  Создано российским программистом на территории Российской Федерации.
  *  (Created by a Russian programmer on the Russian Federation.)
@@ -8,7 +8,7 @@
  *  Разработчик (Developer): Михайлуц Юрий Вычеславович (aracks@yandex.ru)
  */
 
-#include <testbase.h>
+#include <mytests.h>
 #include <tuple>
 #include <regex>
 #include <list>
@@ -18,6 +18,8 @@ namespace my::tests {
 
 	using namespace std;
 
+	inline static constexpr char group_split_char = '/';
+
 	template<typename TChar, typename TValue>
 	inline static basic_ostream<TChar>& operator<<(basic_ostream<TChar>& ostr, optional<TValue> value) {
 		return value ? (ostr << *value) : ostr;
@@ -25,10 +27,11 @@ namespace my::tests {
 
 	template<typename TChar>
 	inline static basic_ostream<TChar>& operator<<(basic_ostream<TChar>& ostr, const TestBase& test) {
+		ostr << '\'';
 		for(const string& grp : test.group) {
-			ostr << "'" << grp << "'.";
+			ostr << grp << group_split_char;
 		}
-		ostr << "'" << test.name << "'" << endl;
+		ostr << "" << test.name << "'" << endl;
 		return ostr;
 	}
 
@@ -119,13 +122,13 @@ namespace my::tests {
 			if (!name_pattern || name_pattern->empty() || name_pattern == ".*"s) {
 				out << "Успешно пройдено " << success << " и провалено " << failed << " из " << candidates.size() << " тестов в группе ";
 				for(auto i = group->begin(); i != group->end(); ++i) {
-					out << *i << ".";
+					out << *i << group_split_char;
 				}
 				out << endl;
 			} else {
 				out << "Успешно пройдено "s << success << " и провалено "s << failed << " из "s << candidates.size() << " тестов отобранных по шаблону имени '"s << name_pattern << " в группе "s;
 				for(auto i = group->begin(); i != group->end(); ++i) {
-					out << *i << ".";
+					out << *i << group_split_char;
 				}
 				out << endl;
 			}
@@ -170,17 +173,19 @@ namespace my::tests {
 		list<string> result;
 		string group_name;
 		for(char c : group) {
-			if (c != '.') {
+			if (c != group_split_char) {
 				group_name += c;
 			} else {
 				result.push_back(group_name);
 				group_name.clear();
 			}
 		}
+		if (!group_name.empty())
+			result.push_back(group_name);
 		return result;
 	}
 
-	TestSet::TestSet() : tests() {}
+	TestSet::TestSet() : tests(), current_group_name() {}
 
 	TestSet* TestSet::currentTestSet = nullptr;
 
@@ -195,6 +200,20 @@ namespace my::tests {
 }	// my::tests
 
 
+using namespace std;
+using namespace my::tests;
+
+int main(int argc, char* argv[]) {
+	switch (argc) {
+		case 1:
+			return TestSet::current().run();
+		case 2:
+			return TestSet::current().run(argv[1]);
+		case 3:
+		default:
+			return TestSet::current().run(argv[1], argv[2]);
+	}
+}
 
 
 

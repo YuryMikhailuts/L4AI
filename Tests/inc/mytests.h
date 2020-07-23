@@ -1,5 +1,5 @@
 /*
- * testbase.h
+ * mytests.h
  *
  *  Создано российским программистом на территории Российской Федерации.
  *  (Created by a Russian programmer on the Russian Federation.)
@@ -8,8 +8,8 @@
  *  Разработчик (Developer): Михайлуц Юрий Вычеславович (aracks@yandex.ru)
  */
 
-#ifndef TESTS_INC_TESTBASE_H_
-#define TESTS_INC_TESTBASE_H_
+#ifndef TESTS_INC_MYTESTS_H_
+#define TESTS_INC_MYTESTS_H_
 #include <string>
 #include <filesystem>
 #include <iostream>
@@ -71,11 +71,17 @@ namespace my::tests {
 	private:
 		static TestSet* currentTestSet;
 		std::list<TestBase*> tests;
+		std::list<std::string> current_group_name;
 		TestSet();
 		friend TestBase;
+		friend struct group_name_setter;
+		friend struct group_name_clear;
 		friend void __expect_impl__(bool expression, std::string_view message, std::filesystem::path&& file, size_t line);
 	public:
 		static TestSet& current();
+		inline static std::list<std::string> get_current_group_name() {
+			return std::list<std::string>(current().current_group_name);
+		}
 		static int run(std::optional<std::string_view> group, std::optional<std::string_view> name_pattern);
 		static int run(std::optional<std::string_view> name_pattern);
 		static int run();
@@ -90,6 +96,33 @@ namespace my::tests {
 		if (!expression) (*TestSet::stream_err) << file << ":" << line << message << std::endl;
 	}
 
+	struct group_name_setter {
+		group_name_setter(std::string_view group_name) {
+			std::list<std::string> added_list = splitGroups(group_name);
+			for(std::string& added_name : added_list) {
+				TestSet::current().current_group_name.push_back(added_name);
+			}
+		}
+	};
+
+	struct group_name_clear {
+		group_name_clear(size_t count) {
+			if (count == 0) {
+				TestSet::current().current_group_name.clear();
+			} else {
+				for(size_t i = 0; i < count; ++i) {
+					TestSet::current().current_group_name.erase(--TestSet::current().current_group_name.end());
+				}
+			}
+		}
+	};
+
+	#define open_group(grp_nm) namespace { group_name_setter set_group_name {#grp_nm}; }
+
+	#define close_groups() namespace { group_name_clear clear_group_name {0}; }
+
+	#define close_group(grpcc) namespace { group_name_clear clear_group_name {grpcc}; }
+
 	#define ccat_impl(x,y) x##y
 
 	#define ccat(x,y) ccat_impl(x,y)
@@ -99,14 +132,14 @@ namespace my::tests {
 	#define err (*my::tests::TestSet::stream_err)
 
 	#define newTest(nm) 	void ccat(testFunction, __LINE__)(); \
-TestBase ccat(testInstance, __LINE__) { #nm, ccat(testFunction, __LINE__) }; \
+TestBase ccat(testInstance, __LINE__) { TestSet::get_current_group_name(), #nm, ccat(testFunction, __LINE__) }; \
 void ccat(testFunction, __LINE__)()
 
 
 }	// my::tests
 
 
-#endif /* TESTS_INC_TESTBASE_H_ */
+#endif /* TESTS_INC_MYTESTS_H_ */
 
 
 
