@@ -3,6 +3,7 @@ project(Tests)
 set(CMAKE_CXX_STANDARD 17)
 set(Tests_SOURCES
 	"src/main.cpp"
+	"src/testbase.cpp"
 )
 add_executable(Tests ${Tests_SOURCES})
 add_dependencies(Tests L4AI)
