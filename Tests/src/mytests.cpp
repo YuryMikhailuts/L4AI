@@ -51,6 +51,7 @@ namespace my::tests {
 	int TestSet::run(std::optional<std::string_view> group, std::optional<std::string_view> name_pattern) {
 		ostream& out = *stream_out;
 		out << "Формируется список тестов для запуска."s << endl;
+		out.flush();
 		list<TestBase*> candidates;
 		if (group) {
 			list<string> group_list = splitGroups(*group);
@@ -95,6 +96,7 @@ namespace my::tests {
 			out << "========================================" << endl;
 			out << "Старт теста " << *test << endl;
 			out << "----------------------------------------" << endl;
+			out.flush();
 			try {
 				clock_t clk = clock();
 				test->test_function();
@@ -104,14 +106,21 @@ namespace my::tests {
 			} catch (std::exception& e) {
 				++failed;
 				err << "Тест провален с ошибкой: "s << e.what() << endl;
+				err.flush();
+			} catch (std::exception* p_e) {
+				++failed;
+				err << "Тест провален с ошибкой: "s << p_e->what() << endl;
+				err.flush();
 			} catch (...) {
 				++failed;
 				err << "Тест провален с неизвестной ошибкой."s << endl;
+				err.flush();
 			}
 		}
 		out << "========================================" << endl;
 		out << "=======Выполнено " << candidates.size() << " тестов из " << TestSet::current().tests.size() << " =====" << endl;
 		out << "========================================" << endl;
+		out.flush();
 		if (!group) {
 			if (!name_pattern || name_pattern->empty() || name_pattern == ".*"s) {
 				out << "Успешно пройдено "s << success << " и провалено "s << failed << " из "s << candidates.size() << " тестов."s << endl;
@@ -133,6 +142,7 @@ namespace my::tests {
 				out << endl;
 			}
 		}
+		out.flush();
 		if (failed == 0) {
 			return 0;
 		} else if (success == 0) {

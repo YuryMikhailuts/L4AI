@@ -89,11 +89,14 @@ namespace my::tests {
 
 
 	inline static void __assert_impl__(bool expression, std::string_view message, std::filesystem::path&& file, size_t line) {
-		if (!expression) throw new std::runtime_error(file.generic_string() + ":" + std::to_string(line) + std::string(message));
+		if (!expression) throw new std::runtime_error(file.generic_string() + ":" + std::to_string(line) + ": " + std::string(message));
 	}
 
 	inline static void __expect_impl__(bool expression, std::string_view message, std::filesystem::path&& file, size_t line) {
-		if (!expression) (*TestSet::stream_err) << file << ":" << line << message << std::endl;
+		if (!expression) {
+			(*TestSet::stream_err) << file << ":" << line << ": " << message << std::endl;
+			(*TestSet::stream_err).flush();
+		}
 	}
 
 	struct group_name_setter {
@@ -117,11 +120,11 @@ namespace my::tests {
 		}
 	};
 
-	#define open_group(grp_nm) namespace { group_name_setter set_group_name {#grp_nm}; }
+	#define open_group(grp_nm) namespace { group_name_setter ccat(set_group_name,__LINE__) {#grp_nm}; }
 
-	#define close_groups() namespace { group_name_clear clear_group_name {0}; }
+	#define close_groups() namespace { group_name_clear ccat(clear_group_name,__LINE__) {0}; }
 
-	#define close_group(grpcc) namespace { group_name_clear clear_group_name {grpcc}; }
+	#define close_group(grpcc) namespace { group_name_clear ccat(clear_group_name,__LINE__) {grpcc}; }
 
 	#define ccat_impl(x,y) x##y
 
