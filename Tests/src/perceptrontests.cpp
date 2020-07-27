@@ -23,21 +23,19 @@ open_group(Перцептрон)
 open_group(Тесты соответствия спецификации)
 
 newTest(Тест порядка вычислений на матрице с уникальными элементами) {
-	static constexpr size_t in_length = 10;
-	static constexpr size_t out_length = 10;
+	static constexpr size_t rows = 10;
+	static constexpr size_t cols = 10;
 	for(size_t useShift = 0; useShift <= 1; ++useShift) {
-		for (int rowsOffset = 0; rowsOffset < in_length; ++rowsOffset) {
+		for (int rowsOffset = 0; rowsOffset < rows - useShift; ++rowsOffset) {
+			inf << "******** " << (useShift ? "useShift; "s : ""s) << "rowsOffset: "s << rowsOffset << "  *******"s << endl;
+			const size_t in_length = rows - useShift + (cols - 1) * rowsOffset;
+			const size_t out_length = cols;
 			unique_ptr<float[]> out_data (new float[out_length]);
 			unique_ptr<float[]> expected_out_data (new float[out_length]);
 			unique_ptr<float[]> in_data (new float[in_length]);
 			for (int i = 0; i < in_length; ++i) {
-				in_data[i] = 10000 * i;
+				in_data[i] = i;
 			}
-			inf << endl << flush;
-			err << endl << flush;
-			size_t rows = in_length + useShift;
-			size_t cols = out_length;
-			rows += (cols - 1) * rowsOffset;
 			FlatPerceptron* specification = new FlatPerceptron{in_length, out_length};
 			specification->setWeightsColumns(cols);
 			specification->setWeightsRows(rows);
@@ -48,18 +46,18 @@ newTest(Тест порядка вычислений на матрице с ун
 			if (PerceptronInstF32* percInst = static_cast<PerceptronInstF32*>(&*instance); percInst != nullptr) {
 				for (size_t r = 0; r < rows; ++r) {
 					for (size_t c = 0; c < cols; ++c) {
-						percInst->getWeight(r, c) = r * cols + c;
+						percInst->getWeight(r, c) = (r * cols + c) * cols * rows;
 					}
 				}
 				float current_offset = 0;
 				for (size_t i = 0; i < out_length; ++i) {
 					expected_out_data[i] = 0;
 					float* weight_column = percInst->getWeightColumn(i);
-					for (size_t r = 0; r < in_length; ++r) {
+					for (size_t r = 0; r < rows - useShift; ++r) {
 						expected_out_data[i] += in_data[r + current_offset] * weight_column[r];
 					}
 					if (useShift != 0) {
-						expected_out_data[i] += weight_column[in_length];
+						expected_out_data[i] += weight_column[rows - 1];
 					}
 					current_offset += specification->getRowsOffset();
 				}
@@ -69,14 +67,11 @@ newTest(Тест порядка вычислений на матрице с ун
 			for (size_t i = 0; i < out_length; ++i) {
 				if (expected_out_data[i] != out_data[i])
 					err << '#' << i << "expected: " << expected_out_data[i] << " actual: " << out_data[i] << endl;
-				else
-					inf << '#' << i << "expected: " << expected_out_data[i] << " actual: " << out_data[i] << endl;
 			}
-			inf << endl << flush;
-			err << endl << flush;
+			inf << flush;
+			err << flush;
 		}
 	}
-	inf << "Когда-то тут, несомненно, будет тест перцептрона."s << endl;
 }
 
 close_groups()
