@@ -11,12 +11,12 @@
 #include <flatperceptron.h>
 #include <perceptroninstance.h>
 #include <calculator.h>
+#include <options.h>
 #include <memory>
 using namespace std;
 using namespace my::tests;
 using namespace l4ai;
 using namespace l4ai::algs;
-
 
 open_group(Перцептрон)
 
@@ -73,6 +73,8 @@ newTest(Тест порядка вычислений на матрице с ун
 		}
 	}
 }
+
+
 
 close_groups()
 

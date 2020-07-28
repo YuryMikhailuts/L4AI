@@ -1,4 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
+message(STATUS "---------------------------------")  
+message(STATUS "Сборка проекта библиотеки искуственного интеллекта L4AI.")  
+message(STATUS "---------------------------------")  
 project(L4AI)
 set(CMAKE_CXX_STANDARD 17)
 option(L4AI_BUILD_STATIC "Build the static library" OFF)
