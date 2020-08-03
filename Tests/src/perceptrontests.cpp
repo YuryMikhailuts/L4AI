@@ -13,7 +13,10 @@
 #include <calculator.h>
 #include <options.h>
 #include <memory>
+#include <vector>
+#include <fstream>
 using namespace std;
+using namespace std::filesystem;
 using namespace my::tests;
 using namespace l4ai;
 using namespace l4ai::algs;
@@ -74,8 +77,59 @@ newTest(Тест порядка вычислений на матрице с ун
 	}
 }
 
+close_group(1)	// Тесты соответствия спецификации
+
+
+open_group(Тесты классификации)
+
+template<size_t width, size_t height>
+struct sample {
+	inline static constexpr size_t data_size = width * height;
+	float data[data_size];
+};
+
+template<size_t width, size_t height>
+struct class_samples {
+	using sample_t = ::sample<width, height>;
+	string name;
+	vector<sample_t> data;
+	class_samples(string_view name) : name(name), data() {}
+};
+
+string memToString(double value, size_t idx = 0) {
+	static const string suffix[] { " Байт"s, " КБайт"s, " МБайт"s, " ГБайт"s, " ТБайт"s };
+	static const size_t suffix_length = sizeof(suffix) / sizeof(string);
+	return (value < 1024 || idx >= suffix_length - 1) ? (to_string(value) + suffix[idx]) : memToString(value / 1024, idx + 1);
+}
+
+newTest(Распознавание чисел){
+	using class_samples_t = class_samples<16, 16>;
+	using samples_t = class_samples_t::sample_t;
+	path base_path = canonical(tests_directory) / "Числа"s;
+	path prepared_path = base_path / "Подготовленные";
+	vector<class_samples_t> classes;
+	size_t mem = 0;
+	for(auto& p_class: directory_iterator(prepared_path)) {
+		class_samples_t& current = classes.emplace_back(p_class.path().filename().generic_string());
+        for(auto& p2: directory_iterator(p_class.path())) {
+        	samples_t& data = current.data.emplace_back();
+        	if (fstream fstr(p2.path(), ios_base::in); fstr.is_open()) {
+        		fstr.read(reinterpret_cast<char*>(data.data), data.data_size);
+        	}
+        }
+        mem += current.data.size() * sizeof(samples_t);
+    }
+	inf << "Образцы загружены. Памяти занято: " << memToString(mem) << endl;
+
+
+}
+
+
+close_group(1)	// Тест с числами
 
 
 close_groups()
+
+
 
 

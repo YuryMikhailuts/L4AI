@@ -22,6 +22,4 @@ inline static const std::filesystem::path tests_directory (TESTS_DATA_DIRECTORY)
 
 
 
-
-
 #endif /* TESTS_INC_OPTIONS_H_ */
