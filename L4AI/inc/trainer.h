@@ -53,14 +53,18 @@ namespace l4ai::algs {
 			const error_function_t error_function;
 			const error_diff_function_t error_diff_function;
 			/**
-			 * @brief Последнее значение ошибки. То есть значение ошибки полученное при последнем запуске @link l4ai::algs::Trainer::toTrain @endlink.
+			 * @brief Последнее значение ошибки. То есть значение ошибки полученное при последнем запуске @link l4ai::algs::Trainer::train @endlink.
 			 */
-			value_t last_error_value;
+			mutable value_t last_error_value;
 			/**
 			 * @brief Скользящее среднее функции ошибки.
 			 * Вычисляется в конце каждого успешного вызова @link l4ai::algs::Trainer::toTrain @endlink как среднее арифметическое последнего скользящего среднего и новой величины ошибки.
 			 */
-			value_t float_average_error;
+			mutable value_t float_average_error;
+
+			bool use_last_error_value;
+
+			bool use_float_average_error;
 
 			value_t train_speed;
 			Trainer(instance_ptr_t&& instance, std::optional<ErrorFunctionType> error_function_type = std::nullopt);
@@ -69,6 +73,32 @@ namespace l4ai::algs {
 			inline value_t getTrainSpeed() const { return train_speed; }
 
 			inline void setTrainSpeed(value_t value) { train_speed = value; }
+
+			/**
+			 * @brief Последнее значение ошибки. То есть значение ошибки полученное при последнем запуске @link l4ai::algs::Trainer::train @endlink.
+			 */
+			value_t getLastErrorValue() const { return last_error_value; }
+			/**
+			 * @brief Скользящее среднее функции ошибки.
+			 * Вычисляется в конце каждого успешного вызова @link l4ai::algs::Trainer::toTrain @endlink как среднее арифметическое последнего скользящего среднего и новой величины ошибки.
+			 */
+			value_t getFloatAverageError() const { return float_average_error; }
+
+			inline bool getUseLastErrorValue() const { return use_last_error_value; }
+
+			inline bool getUseFloatAverageError() const { return use_float_average_error; }
+
+			inline void setUseLastErrorValue(bool value) { use_last_error_value = value; }
+
+			inline void setUseFloatAverageError(bool value) { use_float_average_error = value; }
+
+			inline void onUseLastErrorValue() { setUseLastErrorValue(true); }
+
+			inline void onUseFloatAverageError() { setUseFloatAverageError(true); }
+
+			inline void offUseLastErrorValue() { setUseLastErrorValue(false); }
+
+			inline void offUseFloatAverageError() { setUseFloatAverageError(false); }
 
 			virtual ~Trainer();
 
@@ -104,6 +134,9 @@ namespace l4ai::algs {
 			virtual void fix(trainer_context_t& context, /*in*/ value_t* err_diff_out = nullptr, /*out*/ value_t* err_diff_in = nullptr) = 0;
 			static trainer_ptr_t make(instance_ptr_t inst, std::optional<ErrorFunctionType> error_function_type = std::nullopt);
 		};
+
+		using TrainerF32 = Trainer<float>;
+		using TrainerF64 = Trainer<double>;
 
 } /* namespace l4ai::algs */
 

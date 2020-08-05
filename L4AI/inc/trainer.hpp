@@ -15,6 +15,7 @@
 #include <perceptron.h>
 #include <perceptrontrainer.hpp>
 #include <pipelinetrainer.hpp>
+#include <math.h>
 
 namespace l4ai::algs {
 	using namespace std;
@@ -105,7 +106,9 @@ namespace l4ai::algs {
 		  error_function(getErrorFunction<TValue>(this->error_function_type)),
 		  error_diff_function(getErrorDiffFunction<TValue>(this->error_function_type)),
 		  last_error_value(),
-		  float_average_error(),
+		  float_average_error(NAN),
+		  use_last_error_value(false),
+		  use_float_average_error(false),
 		  train_speed(default_train_speed)
 		  {}
 

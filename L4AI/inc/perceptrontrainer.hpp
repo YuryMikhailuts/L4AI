@@ -99,7 +99,7 @@ namespace l4ai::algs {
 			if (context.target != AlgorithmType::Perceptron) throw runtime_error("Функция обучения перцептрона получила неверный контекст."s);
 			perceptron_context_t& pcntx = static_cast<perceptron_context_t&>(context);
 			value_t* out_diff_summ = pcntx.out_diff_summ;
-			bool result = false;
+			bool result = true;
 			const FlatPerceptron& alg = getFlatPerceptron();
 			auto& inst = perceptron_trainer_t::getPerceptronInstance();
 			bool use_shift = alg.getUseShiftInput();
@@ -161,8 +161,19 @@ namespace l4ai::algs {
 					break;
 			}
 			memcpy(pcntx.in_data, in_data, in_length);
-			if (etalon != nullptr)
+			if (etalon != nullptr) {
 				trainer_t::error_diff_function(out_length, etalon, out_data, out_diff_summ, true);
+				if (trainer_t::use_last_error_value) {
+					trainer_t::last_error_value = trainer_t::error_function(out_length, etalon, out_data);
+					if (trainer_t::use_float_average_error) {
+						if (isnan(trainer_t::float_average_error)) {
+							trainer_t::float_average_error = trainer_t::last_error_value;
+						} else {
+							trainer_t::float_average_error = (trainer_t::float_average_error + trainer_t::last_error_value) / 2;
+						}
+					}
+				}
+			}
 			return result;
 		}
 
