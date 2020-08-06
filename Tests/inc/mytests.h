@@ -120,22 +120,22 @@ namespace my::tests {
 		}
 	};
 
-	#define open_group(grp_nm) namespace { group_name_setter ccat(set_group_name,__LINE__) {#grp_nm}; }
+	#define ccat_impl(x,y) x##y
+
+	#define ccat(x,y) ccat_impl(x,y)
+
+	#define open_group(grp_nm) namespace { group_name_setter ccat(set_group_name,__LINE__) {ccat(u8,#grp_nm)}; }
 
 	#define close_groups() namespace { group_name_clear ccat(clear_group_name,__LINE__) {0}; }
 
 	#define close_group(grpcc) namespace { group_name_clear ccat(clear_group_name,__LINE__) {grpcc}; }
-
-	#define ccat_impl(x,y) x##y
-
-	#define ccat(x,y) ccat_impl(x,y)
 
 	#define inf (*my::tests::TestSet::stream_out)
 
 	#define err (*my::tests::TestSet::stream_err)
 
 	#define newTest(nm) 	void ccat(testFunction, __LINE__)(); \
-TestBase ccat(testInstance, __LINE__) { TestSet::get_current_group_name(), #nm, ccat(testFunction, __LINE__) }; \
+TestBase ccat(testInstance, __LINE__) { TestSet::get_current_group_name(), ccat(u8, #nm), ccat(testFunction, __LINE__) }; \
 void ccat(testFunction, __LINE__)()
 
 

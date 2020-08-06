@@ -18,5 +18,11 @@ add_executable(Tests ${Tests_SOURCES})
 add_dependencies(Tests L4AI)
 target_include_directories(Tests PRIVATE "inc")
 target_link_libraries(Tests L4AI)
-add_custom_command(TARGET Tests POST_BUILD Tests)
-
+add_custom_target(all_tests
+COMMAND Tests)
+add_custom_target(perceptron_tests
+COMMAND Tests "'Перцептрон'" "'.*'")
+add_custom_target(pipe_tests
+COMMAND Tests "'Конвейер'" "'.*'")
+add_custom_target(pipeline_tests
+COMMAND Tests "'Конвейер/Линейный конвейер'" "'.*'")

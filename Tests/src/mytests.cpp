@@ -31,7 +31,7 @@ namespace my::tests {
 		for(const string& grp : test.group) {
 			ostr << grp << group_split_char;
 		}
-		ostr << "" << test.name << "'" << endl;
+		ostr << u8"" << test.name << u8"'" << endl;
 		return ostr;
 	}
 
@@ -39,7 +39,12 @@ namespace my::tests {
 
 	std::ostream* TestSet::stream_err = &cerr;
 
-	static inline bool operator==(const list<string>& left, const list<string>& right);
+	static inline bool in(const list<string>& instance, const list<string>& owner) {
+		list<string>::const_iterator litr, ritr;
+		for((litr = instance.begin(), ritr = owner.begin()); litr != instance.end() && ritr != owner.end(); (++litr, ++ritr))
+			if (*litr != *ritr) return false;
+		return instance.size() >= owner.size();
+	}
 
 	static bool tests_compare(const TestBase* first, const TestBase* second);
 
@@ -50,7 +55,7 @@ namespace my::tests {
 
 	int TestSet::run(std::optional<std::string_view> group, std::optional<std::string_view> name_pattern) {
 		ostream& out = *stream_out;
-		out << "Формируется список тестов для запуска."s << endl;
+		out << u8"Формируется список тестов для запуска."s << endl;
 		out.flush();
 		list<TestBase*> candidates;
 		if (group) {
@@ -58,7 +63,7 @@ namespace my::tests {
 			if (name_pattern && !name_pattern->empty()) {
 				regex re {string(*name_pattern)};
 				for(TestBase* test: TestSet::current().tests) {
-					if (test->group == group_list) {
+					if (in(test->group, group_list)) {
 						if (regex_match(test->name, re)) {
 							out << *test << endl;
 							candidates.push_back(test);
@@ -67,7 +72,7 @@ namespace my::tests {
 				}
 			} else {
 				for(TestBase* test: TestSet::current().tests) {
-					if (test->group == group_list) {
+					if (in(test->group, group_list)) {
 						out << *test << endl;
 						candidates.push_back(test);
 					}
@@ -102,7 +107,7 @@ namespace my::tests {
 				test->test_function();
 				clk = clock() - clk;
 				++success;
-				out << "Тест успешно проден за "s << clk / CLOCKS_PER_SEC << " секунд."s << endl;
+				out << "Тест успешно продйен за "s << clk / CLOCKS_PER_SEC << " секунд."s << endl;
 			} catch (std::exception& e) {
 				++failed;
 				err << "Тест провален с ошибкой: "s << e.what() << endl;
@@ -123,22 +128,18 @@ namespace my::tests {
 		out.flush();
 		if (!group) {
 			if (!name_pattern || name_pattern->empty() || name_pattern == ".*"s) {
-				out << "Успешно пройдено "s << success << " и провалено "s << failed << " из "s << candidates.size() << " тестов."s << endl;
+				out << u8"Успешно пройдено "s << success << u8" и провалено "s << failed << " из "s << candidates.size() << u8" тестов."s << endl;
 			} else {
-				out << "Успешно пройдено "s << success << " и провалено "s << failed << " из "s << candidates.size() << " тестов отобранных по шаблону имени '"s << name_pattern << "'."s << endl;
+				out << u8"Успешно пройдено "s << success << u8" и провалено "s << failed << " из "s << candidates.size() << u8" тестов отобранных по шаблону имени '"s << name_pattern << "'."s << endl;
 			}
 		} else {
 			if (!name_pattern || name_pattern->empty() || name_pattern == ".*"s) {
-				out << "Успешно пройдено " << success << " и провалено " << failed << " из " << candidates.size() << " тестов в группе ";
-				for(auto i = group->begin(); i != group->end(); ++i) {
-					out << *i << group_split_char;
-				}
+				out << u8"Успешно пройдено " << success << u8" и провалено " << failed << " из " << candidates.size() << u8" тестов в группе "s;
+				out << "\""<< group << "\"";
 				out << endl;
 			} else {
-				out << "Успешно пройдено "s << success << " и провалено "s << failed << " из "s << candidates.size() << " тестов отобранных по шаблону имени '"s << name_pattern << " в группе "s;
-				for(auto i = group->begin(); i != group->end(); ++i) {
-					out << *i << group_split_char;
-				}
+				out << u8"Успешно пройдено "s << success << u8" и провалено "s << failed << " из "s << candidates.size() << u8" тестов отобранных по шаблону имени '"s << name_pattern << u8" в группе "s;
+				out << "\""<< group << "\"";
 				out << endl;
 			}
 		}
@@ -158,14 +159,6 @@ namespace my::tests {
 
 	int TestSet::run() {
 		return run(nullopt);
-	}
-
-
-	static inline bool operator==(const list<string>& left, const list<string>& right) {
-		list<string>::const_iterator litr, ritr;
-		for((litr = left.begin(), ritr = right.begin()); litr != left.end() && ritr != right.end(); (++litr, ++ritr))
-			if (*litr != *ritr) return false;
-		return litr == left.end() && ritr == right.end();
 	}
 
 	static inline bool operator<(const list<string>& left, const list<string>& right) {
