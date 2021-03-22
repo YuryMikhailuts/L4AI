@@ -17,7 +17,7 @@ set(L4AI_SOURCES
 	"src/trainer.cpp"
 	"src/pipeline.cpp"
 	"src/pipelineinstance.cpp"
-)
+		src/smart_objects.cpp inc/smart_objects.h src/configurable.cpp)
 
 if (L4AI_BUILD_STATIC)
 	add_library(L4AI STATIC ${L4AI_SOURCES}) # Создание библиотеки

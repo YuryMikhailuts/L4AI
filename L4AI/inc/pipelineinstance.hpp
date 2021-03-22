@@ -14,6 +14,8 @@
 
 namespace l4ai::algs {
 	using namespace std;
+    using namespace l4ai::smart;
+    using namespace l4ai::configure;
 
 	template<typename TValue>
 	PipeLineInstance<TValue>::PipeLineInstance ( std::unique_ptr<PipeLine>&& algorithm )
@@ -62,6 +64,36 @@ namespace l4ai::algs {
 	shared_ptr<Instance<TValue>> PipeLineInstance<TValue>::getLayerPtr(size_t index) {
 		return layers[index];
 	}
+
+    template<typename TValue>
+    void PipeLineInstance<TValue>::setConfiguration(std::shared_ptr<smart::SmartObject> configuration) {
+        switch (configuration->smartType()) {
+            case SmartType::Array: {
+                if (configuration->smartClass != "PipeLineInstance")
+                    throw InvalidConfigurationException(
+                            "Класс Смарт объекта конфигурации для 'PipeLineInstance' должен быть 'PipeLineInstance'.");
+                auto confArray = configuration->asArray();
+                if (confArray->size() != getLayersCount())
+                    throw InvalidConfigurationException(
+                            "Количество слоёв Смарт объекта конфигурации не совпадает с количеством слоёв конфигурируемого объекта 'PipeLineInstance'.");
+                for(size_t i = 0; i < getLayersCount(); ++i) {
+                    getLayer(i).setConfiguration(confArray->at(i));
+                }
+                break;
+            }
+            default:
+                throw InvalidConfigurationException("Тип Смарт объекта конфигурации для 'PerceptronInstance' должен быть SmartType::Map.");
+        }
+    }
+
+    template<typename TValue>
+    std::shared_ptr<smart::SmartObject> PipeLineInstance<TValue>::getConfiguration() const {
+        auto result = SmartObject::create<SmartObjectArray>("PipeLineInstance");
+        for(size_t i = 0; i < getLayersCount(); ++i) {
+            result->data.push_back(getLayer(i).getConfiguration());
+        }
+        return std::shared_ptr<smart::SmartObject>();
+    }
 
 }
 

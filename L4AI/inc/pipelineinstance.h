@@ -38,7 +38,11 @@ namespace l4ai::algs {
 		instance_t& getLayer(size_t index);
 		const instance_t& getLayer(size_t index) const;
 		instance_ptr_t getLayerPtr(size_t index);
-	};
+
+        void setConfiguration(std::shared_ptr<smart::SmartObject> configuration) override;
+
+        [[nodiscard]] std::shared_ptr<smart::SmartObject> getConfiguration() const override;
+    };
 
 	using PipeLineInstanceF32 = PipeLineInstance<float>;
 	using PipeLineInstanceF64 = PipeLineInstance<double>;

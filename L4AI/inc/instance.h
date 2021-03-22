@@ -12,11 +12,12 @@
 #define INSTANCE_H
 #include <algorithm.h>
 #include <memory>
+#include <configurable.h>
 
 namespace l4ai::algs {
 
 	template<typename TValue>
-	class Instance {
+	class Instance : public l4ai::configure::Configurable {
 	public:
 		using value_t = TValue;
 		using instance_t = Instance<TValue>;

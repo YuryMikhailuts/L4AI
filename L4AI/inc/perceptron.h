@@ -96,7 +96,6 @@ namespace l4ai::algs {
 		void setFunction ( const ActivationFunctions& function );
 		void setFunction ( ActivationFunctions&& function );
 		inline PerceptronType getPerceptronType() const { return Perceptron::type; }
-
 	};
 
 }	// l4ai::algs

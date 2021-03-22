@@ -78,6 +78,25 @@ namespace l4ai::algs {
 		void setRowsOffset ( size_t&& value );
 		bool getUseShiftInput() const;
 		void setUseShiftInput ( bool value );
+		inline static FlatPerceptron* make(size_t in_len, size_t out_len, ActivationFunctions af = ActivationFunctions::Trivial, bool useShift = false) {
+			FlatPerceptron* fp = new FlatPerceptron(in_len, out_len);
+			fp->setWeightsRows(in_len + (useShift ? 1 : 0));
+			fp->setWeightsColumns(out_len);
+			fp->setFunction(af);
+			fp->setRowsOffset(0);
+			fp->setUseShiftInput(useShift);
+			return fp;
+		}
+		inline static FlatPerceptron* make(size_t in_len, size_t out_len, size_t rows_offset, ActivationFunctions af = ActivationFunctions::Trivial, bool useShift = false) {
+			if (in_len <= (out_len - 1) * rows_offset) return nullptr;
+			FlatPerceptron* fp = new FlatPerceptron(in_len, out_len);
+			fp->setWeightsRows(in_len - (out_len - 1) * rows_offset + (useShift ? 1 : 0));
+			fp->setWeightsColumns(out_len);
+			fp->setFunction(af);
+			fp->setRowsOffset(rows_offset);
+			fp->setUseShiftInput(useShift);
+			return fp;
+		}
 	};
 
 }	// l4ai::algs

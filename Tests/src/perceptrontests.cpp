@@ -108,12 +108,6 @@ struct class_samples {
 	}
 };
 
-string memToString(double value, size_t idx = 0) {
-	static const string suffix[] { " Байт"s, " КБайт"s, " МБайт"s, " ГБайт"s, " ТБайт"s };
-	static const size_t suffix_length = sizeof(suffix) / sizeof(string);
-	return (value < 1024 || idx >= suffix_length - 1) ? (to_string(value) + suffix[idx]) : memToString(value / 1024, idx + 1);
-}
-
 FlatPerceptron* makeFlatPerceptronSpec(size_t input_length, size_t output_length, ActivationFunctions afun, bool useShift = true, size_t rows_offset = 0) {
 	FlatPerceptron* layer = new FlatPerceptron{input_length, output_length};
 	layer->setWeightsRows(input_length);
@@ -160,8 +154,8 @@ newTest(Распознавание чисел){
         inf << "\t * Образцов: для обучения " << current_train.data.size() << " для проверки " << current_check.data.size() << endl;
     }
 	inf << "Образцы загружены. Памяти занято:" << endl;
-	inf << "\t - Образцы для обучения: " << memToString(memt) << endl;
-	inf << "\t - Образцы для проверки: " << memToString(memc) << endl;
+//	inf << "\t - Образцы для обучения: " << memToString(memt) << endl;
+//	inf << "\t - Образцы для проверки: " << memToString(memc) << endl;
 
 	shared_ptr<InstanceF32> layer0 (InstanceF32::make(makeFlatPerceptronSpec(16 * 16, internal_length, ActivationFunctions::HyperbolicTangent, true, 1)));
 	shared_ptr<InstanceF32> layer1 (InstanceF32::make(makeFlatPerceptronSpec(internal_length, 5, ActivationFunctions::Logistic, false, 0)));

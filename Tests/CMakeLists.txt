@@ -12,7 +12,9 @@ add_definitions(-DTESTS_DATA_DIRECTORY="${TESTS_DATA_DIRECTORY}")
 set(CMAKE_CXX_STANDARD 17)
 set(Tests_SOURCES
 	"src/perceptrontests.cpp"
+	"src/pipetests.cpp"
 	"src/mytests.cpp"
+	"src/testsutils.cpp"
 )
 add_executable(Tests ${Tests_SOURCES})
 add_dependencies(Tests L4AI)

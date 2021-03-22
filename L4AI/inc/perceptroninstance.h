@@ -64,7 +64,11 @@ namespace l4ai::algs {
 		inline const value_t& getWeight(size_t row, size_t col) const { return at(weights, col, row, rows_count); }
 		inline value_t* getWeightColumn(size_t col) { return column(weights, col, rows_count); }
 		inline const value_t* getWeightColumn(size_t col) const { return column(weights, col, rows_count); }
-	};
+
+        void setConfiguration(std::shared_ptr<smart::SmartObject> configuration) override;
+
+        [[nodiscard]] std::shared_ptr<smart::SmartObject> getConfiguration() const override;
+    };
 
 	using PerceptronInstF32 = PerceptronInstance<float>;
 	using PerceptronInstF64 = PerceptronInstance<double>;
