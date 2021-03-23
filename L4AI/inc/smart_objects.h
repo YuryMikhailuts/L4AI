@@ -4,18 +4,21 @@
  *  Создано российским программистом на территории Российской Федерации.
  *  (Created by a Russian programmer on the Russian Federation.)
  *
- *  Дата создания (Created): 23 марта 2021 г.
+ *  Дата создания (Created): 22 марта 2021 г.
  *  Разработчик (Developer): Михайлуц Юрий Вычеславович (aracks@yandex.ru)
  */
 
 #ifndef LIBRARY4_ARTIFICIAL_INTELLIGENCE_SMART_OBJECTS_H
 #define LIBRARY4_ARTIFICIAL_INTELLIGENCE_SMART_OBJECTS_H
+
 #include <string>
 #include <type_traits>
 #include <memory>
 #include <vector>
 #include <unordered_map>
 #include <cstring>
+#include <codecvt>
+#include <locale>
 
 namespace l4ai::smart {
 
@@ -159,6 +162,10 @@ namespace l4ai::smart {
         explicit SmartStringObject(std::string_view smartClass = "") : SmartObject(smartClass) {}
 
         [[nodiscard]] virtual SmartStringSubType stringSubType() const = 0;
+
+        virtual std::string asCStr() const = 0;
+
+        virtual std::wstring asWStr() const = 0;
     };
 
     template<typename TChar, typename = std::enable_if_t<is_char<TChar>>>
@@ -173,6 +180,30 @@ namespace l4ai::smart {
         [[nodiscard]] SmartStringSubType stringSubType() const override;
 
         string_t value;
+
+        std::string asCStr() const override {
+            if constexpr (std::is_same_v<char, TChar>) {
+                return value;
+            } else if constexpr (std::is_same_v<wchar_t, TChar>) {
+                std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+                return converter.to_bytes(value);
+            } else {
+                static_assert(std::is_same_v<char, TChar> || std::is_same_v<wchar_t, TChar>,
+                              "TChar должен быть char или wchar_t.");
+            }
+        }
+
+        std::wstring asWStr() const override {
+            if constexpr (std::is_same_v<char, TChar>) {
+                std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+                return converter.from_bytes(value);
+            } else if constexpr (std::is_same_v<wchar_t, TChar>) {
+                return value;
+            } else {
+                static_assert(std::is_same_v<char, TChar> || std::is_same_v<wchar_t, TChar>,
+                              "TChar должен быть char или wchar_t.");
+            }
+        }
 
         SmartString &operator=(string_view_t i) {
             value = i;
@@ -198,36 +229,54 @@ namespace l4ai::smart {
         }
     };
 
-    class SmartArrayObject : public SmartObject {
-    public:
+    struct SmartArrayObject : public SmartObject {
         explicit SmartArrayObject(std::string_view smartClass = "") : SmartObject(smartClass) {}
+
         [[nodiscard]] SmartType smartType() const override { return SmartType::Array; }
+
         [[nodiscard]] virtual SmartArraySubType arraySubType() const = 0;
+
         virtual std::shared_ptr<SmartObject> at(size_t index) = 0;
+
         virtual size_t size() const = 0;
 
-        virtual void fill(int8_t * target, size_t target_size) const = 0;
-        virtual void fill(int16_t * target, size_t target_size) const = 0;
-        virtual void fill(int32_t * target, size_t target_size) const = 0;
-        virtual void fill(int64_t * target, size_t target_size) const = 0;
-        virtual void fill(uint8_t * target, size_t target_size) const = 0;
-        virtual void fill(uint16_t * target, size_t target_size) const = 0;
-        virtual void fill(uint32_t * target, size_t target_size) const = 0;
-        virtual void fill(uint64_t * target, size_t target_size) const = 0;
-        virtual void fill(float * target, size_t target_size) const = 0;
-        virtual void fill(double * target, size_t target_size) const = 0;
+        std::shared_ptr<class SmartObjectArray> asObjectArray();
+
+        std::shared_ptr<class SmartIntArrayObject> asIntArray();
+
+        std::shared_ptr<class SmartFloatArrayObject> asFloatArray();
+
+        virtual void get(int8_t *target, size_t target_size) const = 0;
+
+        virtual void get(int16_t *target, size_t target_size) const = 0;
+
+        virtual void get(int32_t *target, size_t target_size) const = 0;
+
+        virtual void get(int64_t *target, size_t target_size) const = 0;
+
+        virtual void get(uint8_t *target, size_t target_size) const = 0;
+
+        virtual void get(uint16_t *target, size_t target_size) const = 0;
+
+        virtual void get(uint32_t *target, size_t target_size) const = 0;
+
+        virtual void get(uint64_t *target, size_t target_size) const = 0;
+
+        virtual void get(float *target, size_t target_size) const = 0;
+
+        virtual void get(double *target, size_t target_size) const = 0;
 
     };
 
     template<typename TInt, typename = std::enable_if_t<is_int<TInt>>> class SmartIntArray;
     template<typename TFloat, typename = std::enable_if_t<is_float<TFloat>>> class SmartFloatArray;
 
-    class SmartObjectArray : public SmartArrayObject {
-    public:
+    struct SmartObjectArray : public SmartArrayObject {
         explicit SmartObjectArray(std::string_view smartClass = "") : SmartArrayObject(smartClass) {}
 
         [[nodiscard]] SmartArraySubType arraySubType() const override { return SmartArraySubType::Object; };
         std::vector<std::shared_ptr<SmartObject>> data;
+
         inline std::shared_ptr<SmartObject> operator[](size_t index) { return data[index]; }
 
         std::shared_ptr<SmartObject> at(size_t index) override {
@@ -295,159 +344,222 @@ namespace l4ai::smart {
         std::shared_ptr<class SmartMapObject> addMap(std::string_view smartClass = "");
 
 
-        void fill(int8_t *target, size_t target_size) const override {
+        void get(int8_t *target, size_t target_size) const override {
             throw std::runtime_error("Не применимо.");
         }
 
-        void fill(int16_t *target, size_t target_size) const override {
+        void get(int16_t *target, size_t target_size) const override {
             throw std::runtime_error("Не применимо.");
         }
 
-        void fill(int32_t *target, size_t target_size) const override {
+        void get(int32_t *target, size_t target_size) const override {
             throw std::runtime_error("Не применимо.");
         }
 
-        void fill(int64_t *target, size_t target_size) const override {
+        void get(int64_t *target, size_t target_size) const override {
             throw std::runtime_error("Не применимо.");
         }
 
-        void fill(uint8_t *target, size_t target_size) const override {
+        void get(uint8_t *target, size_t target_size) const override {
             throw std::runtime_error("Не применимо.");
         }
 
-        void fill(uint16_t *target, size_t target_size) const override {
+        void get(uint16_t *target, size_t target_size) const override {
             throw std::runtime_error("Не применимо.");
         }
 
-        void fill(uint32_t *target, size_t target_size) const override {
+        void get(uint32_t *target, size_t target_size) const override {
             throw std::runtime_error("Не применимо.");
         }
 
-        void fill(uint64_t *target, size_t target_size) const override {
+        void get(uint64_t *target, size_t target_size) const override {
             throw std::runtime_error("Не применимо.");
         }
 
-        void fill(float *target, size_t target_size) const override {
+        void get(float *target, size_t target_size) const override {
             throw std::runtime_error("Не применимо.");
         }
 
-        void fill(double *target, size_t target_size) const override {
+        void get(double *target, size_t target_size) const override {
             throw std::runtime_error("Не применимо.");
         }
     };
 
+    struct SmartIntArrayObject : public SmartArrayObject {
+        explicit SmartIntArrayObject(std::string_view smartClass = "") : SmartArrayObject(smartClass) {}
+
+        [[nodiscard]] virtual SmartIntSubType intSubType() const = 0;
+
+        virtual int8_t atInt8(size_t index) const = 0;
+
+        virtual int16_t atInt16(size_t index) const = 0;
+
+        virtual int32_t atInt32(size_t index) const = 0;
+
+        virtual int64_t atInt64(size_t index) const = 0;
+
+        virtual uint8_t atUInt8(size_t index) const = 0;
+
+        virtual uint16_t atUInt16(size_t index) const = 0;
+
+        virtual uint32_t atUInt32(size_t index) const = 0;
+
+        virtual int64_t atUInt64(size_t index) const = 0;
+    };
 
     template<typename TInt>
-    class SmartIntArray<TInt> : public SmartArrayObject {
-    public:
-        explicit SmartIntArray(std::string_view smartClass = "") : SmartArrayObject(smartClass) {}
+    struct SmartIntArray<TInt> : public SmartIntArrayObject {
+        explicit SmartIntArray(std::string_view smartClass = "") : SmartIntArrayObject(smartClass) {}
+
         std::shared_ptr<SmartObject> at(size_t index) override {
             auto result = SmartObject::create<SmartInt<TInt>>();
             *result = (*this)[index];
             return result;
         }
+
         [[nodiscard]] SmartArraySubType arraySubType() const override { return SmartArraySubType::Int; };
         std::vector<TInt> data;
 
-        inline TInt& operator[](size_t index) { return data[index]; }
-        inline const TInt& operator[](size_t index) const { return data[index]; }
+        [[nodiscard]] SmartIntSubType intSubType() const override;
+
+        inline TInt &operator[](size_t index) { return data[index]; }
+
+        inline const TInt &operator[](size_t index) const { return data[index]; }
+
         size_t size() const override { return data.size(); }
 
-        void fill(int8_t *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        int8_t atInt8(size_t index) const override { return data[index]; }
+
+        int16_t atInt16(size_t index) const override { return data[index]; }
+
+        int32_t atInt32(size_t index) const override { return data[index]; }
+
+        int64_t atInt64(size_t index) const override { return data[index]; }
+
+        uint8_t atUInt8(size_t index) const override { return data[index]; }
+
+        uint16_t atUInt16(size_t index) const override { return data[index]; }
+
+        uint32_t atUInt32(size_t index) const override { return data[index]; }
+
+        int64_t atUInt64(size_t index) const override { return data[index]; }
+
+
+        void get(int8_t *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(int16_t *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(int16_t *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(int32_t *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(int32_t *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(int64_t *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(int64_t *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(uint8_t *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(uint8_t *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(uint16_t *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(uint16_t *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(uint32_t *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(uint32_t *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(uint64_t *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(uint64_t *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(float *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(float *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(double *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(double *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
     };
 
+    struct SmartFloatArrayObject : public SmartArrayObject {
+        explicit SmartFloatArrayObject(std::string_view smartClass = "") : SmartArrayObject(smartClass) {}
+
+        [[nodiscard]] virtual SmartFloatSubType floatSubType() const = 0;
+
+        virtual float atFloat32(size_t index) const = 0;
+
+        virtual double atFloat64(size_t index) const = 0;
+    };
+
     template<typename TFloat>
-    class SmartFloatArray<TFloat> : public SmartArrayObject {
+    class SmartFloatArray<TFloat> : public SmartFloatArrayObject {
     public:
-        explicit SmartFloatArray(std::string_view smartClass = "") : SmartArrayObject(smartClass) {}
+        explicit SmartFloatArray(std::string_view smartClass = "") : SmartFloatArrayObject(smartClass) {}
+
         std::shared_ptr<SmartObject> at(size_t index) override {
             auto result = SmartObject::create<SmartFloat<TFloat>>();
             *result = (*this)[index];
             return result;
         }
+
         [[nodiscard]] SmartArraySubType arraySubType() const override { return SmartArraySubType::Float; };
         std::vector<TFloat> data;
 
-        inline TFloat& operator[](size_t index) { return data[index]; }
-        inline const TFloat& operator[](size_t index) const { return data[index]; }
+        [[nodiscard]] SmartFloatSubType floatSubType() const override;
+
+        inline TFloat &operator[](size_t index) { return data[index]; }
+
+        inline const TFloat &operator[](size_t index) const { return data[index]; }
+
         size_t size() const override { return data.size(); }
 
-        void fill(int8_t *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        float atFloat32(size_t index) const override { return data[index]; }
+
+        double atFloat64(size_t index) const override { return data[index]; }
+
+        void get(int8_t *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(int16_t *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(int16_t *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(int32_t *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(int32_t *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(int64_t *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(int64_t *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(uint8_t *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(uint8_t *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(uint16_t *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(uint16_t *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(uint32_t *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(uint32_t *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(uint64_t *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(uint64_t *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(float *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(float *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
 
-        void fill(double *target, size_t target_size) const override {
-            for(size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+        void get(double *target, size_t target_size) const override {
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
     };
 
@@ -494,7 +606,7 @@ namespace l4ai::smart {
 
         template<typename TInt, typename = std::enable_if_t<is_int<TInt>>>
         std::shared_ptr<SmartIntArray<TInt>> setIntArray(std::string_view name, TInt* value, size_t size, std::string_view smartClass = "") {
-            auto result = setIntArray<TInt>(smartClass);
+            auto result = setIntArray<TInt>(name, smartClass);
             result->data.resize(size);
             memcpy(result->data.data(), value, size * sizeof(TInt));
             return result;
@@ -502,7 +614,7 @@ namespace l4ai::smart {
 
         template<typename TFloat, typename = std::enable_if_t<is_float<TFloat>>>
         std::shared_ptr<SmartFloatArray<TFloat>> setFloatArray(std::string_view name, TFloat* value, size_t size, std::string_view smartClass = "") {
-            auto result = setFloatArray<TFloat>(smartClass);
+            auto result = setFloatArray<TFloat>(name, smartClass);
             result->data.resize(size);
             memcpy(result->data.data(), value, size * sizeof(TFloat));
             return result;

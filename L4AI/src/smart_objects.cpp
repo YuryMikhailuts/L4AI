@@ -4,7 +4,7 @@
  *  Создано российским программистом на территории Российской Федерации.
  *  (Created by a Russian programmer on the Russian Federation.)
  *
- *  Дата создания (Created): 23 марта 2021 г.
+ *  Дата создания (Created): 22 марта 2021 г.
  *  Разработчик (Developer): Михайлуц Юрий Вычеславович (aracks@yandex.ru)
  */
 #include "smart_objects.h"
@@ -61,6 +61,29 @@ namespace l4ai::smart {
     template<>
     SmartIntSubType SmartInt<int64_t>::intSubType() const { return SmartIntSubType::SInt64; }
 
+    template<>
+    SmartIntSubType SmartIntArray<uint8_t>::intSubType() const { return SmartIntSubType::UInt8; }
+
+    template<>
+    SmartIntSubType SmartIntArray<uint16_t>::intSubType() const { return SmartIntSubType::UInt16; }
+
+    template<>
+    SmartIntSubType SmartIntArray<uint32_t>::intSubType() const { return SmartIntSubType::UInt32; }
+
+    template<>
+    SmartIntSubType SmartIntArray<uint64_t>::intSubType() const { return SmartIntSubType::UInt64; }
+
+    template<>
+    SmartIntSubType SmartIntArray<int8_t>::intSubType() const { return SmartIntSubType::SInt8; }
+
+    template<>
+    SmartIntSubType SmartIntArray<int16_t>::intSubType() const { return SmartIntSubType::SInt16; }
+
+    template<>
+    SmartIntSubType SmartIntArray<int32_t>::intSubType() const { return SmartIntSubType::SInt32; }
+
+    template<>
+    SmartIntSubType SmartIntArray<int64_t>::intSubType() const { return SmartIntSubType::SInt64; }
 
     template<>
     SmartFloatSubType SmartFloat<float>::floatSubType() const { return SmartFloatSubType::Float32; }
@@ -68,6 +91,11 @@ namespace l4ai::smart {
     template<>
     SmartFloatSubType SmartFloat<double>::floatSubType() const { return SmartFloatSubType::Float64; }
 
+    template<>
+    SmartFloatSubType SmartFloatArray<float>::floatSubType() const { return SmartFloatSubType::Float32; }
+
+    template<>
+    SmartFloatSubType SmartFloatArray<double>::floatSubType() const { return SmartFloatSubType::Float64; }
 
     template<>
     SmartStringSubType SmartString<char>::stringSubType() const { return SmartStringSubType::String; }
@@ -108,14 +136,44 @@ namespace l4ai::smart {
     template class SmartInt<uint8_t>;
     template class SmartInt<uint16_t>;
     template class SmartInt<uint32_t>;
-    template class SmartInt<uint64_t>;
-    template class SmartInt<int8_t>;
-    template class SmartInt<int16_t>;
-    template class SmartInt<int32_t>;
-    template class SmartInt<int64_t>;
-    template class SmartFloat<float>;
-    template class SmartFloat<double>;
-    template class SmartString<char>;
-    template class SmartString<wchar_t>;
+
+    template
+    class SmartInt<uint64_t>;
+
+    template
+    class SmartInt<int8_t>;
+
+    template
+    class SmartInt<int16_t>;
+
+    template
+    class SmartInt<int32_t>;
+
+    template
+    class SmartInt<int64_t>;
+
+    template
+    class SmartFloat<float>;
+
+    template
+    class SmartFloat<double>;
+
+    template
+    class SmartString<char>;
+
+    template
+    class SmartString<wchar_t>;
+
+    std::shared_ptr<class SmartObjectArray> SmartArrayObject::asObjectArray() {
+        return std::dynamic_pointer_cast<SmartObjectArray>(shared_from_this());
+    }
+
+    std::shared_ptr<class SmartIntArrayObject> SmartArrayObject::asIntArray() {
+        return std::dynamic_pointer_cast<SmartIntArrayObject>(shared_from_this());
+    }
+
+    std::shared_ptr<class SmartFloatArrayObject> SmartArrayObject::asFloatArray() {
+        return std::dynamic_pointer_cast<SmartFloatArrayObject>(shared_from_this());
+    }
 
 }

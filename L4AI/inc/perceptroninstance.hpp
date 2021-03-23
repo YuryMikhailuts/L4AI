@@ -68,7 +68,7 @@ namespace l4ai::algs {
                 switch (weightsArray->arraySubType()) {
                     case SmartArraySubType::Int:
                     case SmartArraySubType::Float:
-                        weightsArray->fill(weights, cols_count * rows_count);
+                        weightsArray->get(weights, cols_count * rows_count);
                         break;
                     default:
                         throw InvalidConfigurationException(

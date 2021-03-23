@@ -11,11 +11,11 @@ message(STATUS "Путь к каталогу с данными для тесто
 add_definitions(-DTESTS_DATA_DIRECTORY="${TESTS_DATA_DIRECTORY}")
 set(CMAKE_CXX_STANDARD 17)
 set(Tests_SOURCES
-	"src/perceptrontests.cpp"
-	"src/pipetests.cpp"
-	"src/mytests.cpp"
-	"src/testsutils.cpp"
-)
+        "src/perceptrontests.cpp"
+        "src/pipetests.cpp"
+        "src/mytests.cpp"
+        "src/testsutils.cpp"
+        src/smarttests.cpp)
 add_executable(Tests ${Tests_SOURCES})
 add_dependencies(Tests L4AI)
 target_include_directories(Tests PRIVATE "inc")
