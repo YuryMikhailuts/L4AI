@@ -7,17 +7,21 @@ set(CMAKE_CXX_STANDARD 17)
 option(L4AI_BUILD_STATIC "Build the static library" OFF)
 set(L4AI_SOURCES
 	"src/algorithm.cpp"
-		"src/convolutionperceptron.cpp"
-		"src/flatperceptron.cpp"
-		"src/instance.cpp"
-		"src/perceptron.cpp"
-		"src/perceptroninstance.cpp"
-		"src/pipe.cpp"
-		"src/calculator.cpp"
-		"src/trainer.cpp"
-		"src/pipeline.cpp"
-		"src/pipelineinstance.cpp"
-		src/smart_objects.cpp inc/smart_objects.h src/configurable.cpp src/smart_to_json.cpp inc/smart_to_json.h)
+        "src/convolutionperceptron.cpp"
+        "src/flatperceptron.cpp"
+        "src/instance.cpp"
+        "src/perceptron.cpp"
+        "src/perceptroninstance.cpp"
+        "src/pipe.cpp"
+        "src/calculator.cpp"
+        "src/trainer.cpp"
+        "src/pipeline.cpp"
+        "src/pipelineinstance.cpp"
+        "src/smart_objects.cpp"
+        "src/configurable.cpp"
+        "src/smart_to_json.cpp"
+        "src/smart_from_json.cpp"
+        )
 
 if (L4AI_BUILD_STATIC)
 	add_library(L4AI STATIC ${L4AI_SOURCES}) # Создание библиотеки

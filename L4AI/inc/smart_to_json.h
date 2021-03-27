@@ -1,5 +1,5 @@
 /*
- * configurable.h
+ * smart_to_json.h
  *
  *  Создано российским программистом на территории Российской Федерации.
  *  (Created by a Russian programmer on the Russian Federation.)

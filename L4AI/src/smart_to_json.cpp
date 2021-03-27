@@ -1,6 +1,12 @@
-//
-// Created by unknown on 22.03.2021.
-//
+/*
+ * smart_to_json.cpp
+ *
+ *  Создано российским программистом на территории Российской Федерации.
+ *  (Created by a Russian programmer on the Russian Federation.)
+ *
+ *  Дата создания (Created): 22 марта 2021 г.
+ *  Разработчик (Developer): Михайлуц Юрий Вычеславович (aracks@yandex.ru)
+ */
 
 #include <smart_to_json.h>
 
@@ -124,7 +130,7 @@ namespace l4ai::smart {
             }
         }
         tab_dec();
-        out << tab << "}\n";
+        out << tab << "}";
     }
 
     void SmartToJson::saveImpl(const std::shared_ptr<SmartObjectArray> &smartArray) {
@@ -157,7 +163,18 @@ namespace l4ai::smart {
     }
 
     void SmartToJson::saveImpl(const std::shared_ptr<SmartStringObject> &smartString) {
+        bool onSmartClass = !smartString->smartClass.empty();
+        if (onSmartClass) {
+            out << "{\n";
+            tab_inc();
+            out << tab << R"("@class": ")" << smartString->smartClass << "\",\n";
+            out << tab << R"("@value": )";
+        }
         out << "\"" << smartString->asCStr() << "\"";
+        if (onSmartClass) {
+            tab_dec();
+            out << "\n" << tab << "}";
+        }
     }
 
     void SmartToJson::tab_inc() {

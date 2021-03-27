@@ -19,6 +19,7 @@
 #include <cstring>
 #include <codecvt>
 #include <locale>
+#include <optional>
 
 namespace l4ai::smart {
 
@@ -38,6 +39,34 @@ namespace l4ai::smart {
         Object, Int, Float
     };
 
+    std::string to_string(SmartType smartType);
+
+    std::string to_string(SmartIntSubType smartIntSubType);
+
+    std::string to_string(SmartFloatSubType smartFloatSubType);
+
+    std::string to_string(SmartStringSubType smartStringSubType);
+
+    std::string to_string(SmartArraySubType smartArraySubType);
+
+    inline constexpr bool operator>(SmartIntSubType l, SmartIntSubType r);
+
+    inline constexpr bool operator>=(SmartIntSubType l, SmartIntSubType r);
+
+    inline constexpr bool operator<(SmartIntSubType l, SmartIntSubType r);
+
+    inline constexpr bool operator<=(SmartIntSubType l, SmartIntSubType r);
+
+    inline constexpr SmartFloatSubType minFloatType(SmartIntSubType intSubType);
+
+    inline constexpr bool operator>(SmartFloatSubType l, SmartFloatSubType r);
+
+    inline constexpr bool operator>=(SmartFloatSubType l, SmartFloatSubType r);
+
+    inline constexpr bool operator<(SmartFloatSubType l, SmartFloatSubType r);
+
+    inline constexpr bool operator<=(SmartFloatSubType l, SmartFloatSubType r);
+
     template<typename T>
     inline static constexpr bool is_signed_int =
             std::is_same_v<T, int8_t> || std::is_same_v<T, int16_t> || std::is_same_v<T, int32_t> ||
@@ -54,7 +83,7 @@ namespace l4ai::smart {
     inline static constexpr bool is_char = std::is_same_v<T, char> || std::is_same_v<T, wchar_t>;
 
     struct SmartObject : public std::enable_shared_from_this<SmartObject> {
-        const std::string smartClass;
+        std::string smartClass;
 
         explicit SmartObject(std::string_view smartClass = "");
 
@@ -68,24 +97,51 @@ namespace l4ai::smart {
         }
 
         std::shared_ptr<class SmartIntObject> asInt();
+
         std::shared_ptr<class SmartFloatObject> asFloat();
+
         std::shared_ptr<class SmartStringObject> asString();
+
         std::shared_ptr<class SmartArrayObject> asArray();
+
         std::shared_ptr<class SmartMapObject> asMap();
+
+        virtual bool operator==(const SmartObject &other) const = 0;
+
+        virtual bool operator!=(const SmartObject &other) const {
+            return !(*this == other);
+        }
+
     };
 
 
     struct SmartIntObject : public SmartObject {
         explicit SmartIntObject(std::string_view smartClass = "") : SmartObject(smartClass) {}
+
         [[nodiscard]] virtual SmartIntSubType intSubType() const = 0;
-        explicit virtual operator int8_t () const = 0;
-        explicit virtual operator int16_t () const = 0;
-        explicit virtual operator int32_t () const = 0;
-        explicit virtual operator int64_t () const = 0;
-        explicit virtual operator uint8_t () const = 0;
-        explicit virtual operator uint16_t () const = 0;
-        explicit virtual operator uint32_t () const = 0;
-        explicit virtual operator uint64_t () const = 0;
+
+        explicit virtual operator int8_t() const = 0;
+
+        explicit virtual operator int16_t() const = 0;
+
+        explicit virtual operator int32_t() const = 0;
+
+        explicit virtual operator int64_t() const = 0;
+
+        explicit virtual operator uint8_t() const = 0;
+
+        explicit virtual operator uint16_t() const = 0;
+
+        explicit virtual operator uint32_t() const = 0;
+
+        explicit virtual operator uint64_t() const = 0;
+
+        explicit virtual operator float() const { return (int64_t) *this; };
+
+        explicit virtual operator double() const { return (int64_t) *this; };
+
+        template<typename TInt>
+        static std::shared_ptr<SmartIntObject> create(TInt value, std::string_view smartClass = "");
     };
 
     template<typename TInt, typename = std::enable_if_t<is_int<TInt>>>
@@ -108,7 +164,7 @@ namespace l4ai::smart {
             return *this;
         }
 
-        explicit operator int8_t() const override  { return value; }
+        explicit operator int8_t() const override { return value; }
 
         explicit operator int16_t() const override { return value; }
 
@@ -123,14 +179,32 @@ namespace l4ai::smart {
         explicit operator uint32_t() const override { return value; }
 
         explicit operator uint64_t() const override { return value; }
+
+        bool operator==(const SmartObject &other) const override {
+            if (other.smartType() != SmartType::Int) return false;
+            return this->operator long() == dynamic_cast<const SmartIntObject &>(other).operator long() &&
+                   smartClass == other.smartClass;
+        }
     };
+
+    template<typename TInt>
+    std::shared_ptr<SmartIntObject> SmartIntObject::create(TInt value, std::string_view smartClass) {
+        auto result = SmartObject::create<SmartInt<TInt>>(smartClass);
+        *result = value;
+        return result;
+    }
 
     struct SmartFloatObject : public SmartObject {
         explicit SmartFloatObject(std::string_view smartClass = "") : SmartObject(smartClass) {}
 
         [[nodiscard]] virtual SmartFloatSubType floatSubType() const = 0;
+
         explicit virtual operator float() const = 0;
+
         explicit virtual operator double() const = 0;
+
+        template<typename TFloat>
+        static std::shared_ptr<SmartFloatObject> create(TFloat value, std::string_view smartClass = "");
     };
 
     template<typename TFloat, typename = std::enable_if_t<is_float<TFloat>>>
@@ -156,7 +230,21 @@ namespace l4ai::smart {
         explicit operator float() const override { return value; }
 
         explicit operator double() const override { return value; }
+
+        bool operator==(const SmartObject &other) const override {
+            if (other.smartType() != SmartType::Float) return false;
+            return this->operator double() == dynamic_cast<const SmartFloatObject &>(other).operator double() &&
+                   smartClass == other.smartClass;
+        }
     };
+
+    template<typename TFloat>
+    std::shared_ptr<SmartFloatObject> SmartFloatObject::create(TFloat value, std::string_view smartClass) {
+        auto result = SmartObject::create<SmartFloat<TFloat>>(smartClass);
+        *result = value;
+        return result;
+    }
+
 
     struct SmartStringObject : public SmartObject {
         explicit SmartStringObject(std::string_view smartClass = "") : SmartObject(smartClass) {}
@@ -166,6 +254,11 @@ namespace l4ai::smart {
         virtual std::string asCStr() const = 0;
 
         virtual std::wstring asWStr() const = 0;
+
+        template<typename TChar, typename = std::enable_if_t<is_char<TChar>>>
+        static std::shared_ptr<SmartStringObject>
+        create(std::basic_string_view<TChar> text, std::string_view smartClassName = "");
+
     };
 
     template<typename TChar, typename = std::enable_if_t<is_char<TChar>>>
@@ -227,7 +320,28 @@ namespace l4ai::smart {
         explicit operator string_view_t() const {
             return value;
         }
+
+        bool operator==(const SmartObject &other) const override {
+            if (other.smartType() != SmartType::String) return false;
+            const auto &otherStringObject = dynamic_cast<const SmartStringObject &>(other);
+            if (otherStringObject.stringSubType() == stringSubType()) {
+                const auto &otherString = dynamic_cast<const SmartString<TChar> &>(otherStringObject);
+                return value == otherString.value && smartClass == other.smartClass;
+            } else {
+                return asWStr() == otherStringObject.asWStr() && smartClass == other.smartClass;
+            }
+        }
+
     };
+
+    template<typename TChar, typename>
+    std::shared_ptr<SmartStringObject>
+    SmartStringObject::create(std::basic_string_view<TChar> text, std::string_view smartClassName) {
+        auto result = SmartObject::create<SmartString<TChar>>(smartClassName);
+        *result = text;
+        return result;
+    }
+
 
     struct SmartArrayObject : public SmartObject {
         explicit SmartArrayObject(std::string_view smartClass = "") : SmartObject(smartClass) {}
@@ -239,6 +353,8 @@ namespace l4ai::smart {
         virtual std::shared_ptr<SmartObject> at(size_t index) = 0;
 
         virtual size_t size() const = 0;
+
+        virtual void resize(size_t size) = 0;
 
         std::shared_ptr<class SmartObjectArray> asObjectArray();
 
@@ -285,6 +401,7 @@ namespace l4ai::smart {
 
         size_t size() const override { return data.size(); }
 
+        void resize(size_t size) override;
 
         template<typename TInt, typename = std::enable_if_t<is_int<TInt>>>
         std::shared_ptr<SmartInt<TInt>> addInt(TInt value, std::string_view smartClass = "") {
@@ -383,12 +500,70 @@ namespace l4ai::smart {
         void get(double *target, size_t target_size) const override {
             throw std::runtime_error("Не применимо.");
         }
+
+        std::optional<SmartIntSubType> canConvertToIntArray();
+
+        std::optional<SmartFloatSubType> canConvertToFloatArray();
+
+        std::shared_ptr<SmartIntArrayObject>
+        convertToIntArray(std::optional<SmartIntSubType> intSubType = std::nullopt);
+
+        std::shared_ptr<SmartFloatArrayObject>
+        convertToFloatArray(std::optional<SmartFloatSubType> floatSubType = std::nullopt);
+
+        bool operator==(const SmartObject &other) const override {
+            if (other.smartType() != SmartType::Array) return false;
+            const auto &otherArrayObject = dynamic_cast<const SmartArrayObject &>(other);
+            if (otherArrayObject.arraySubType() == arraySubType()) {
+                const auto &otherObjectArray = dynamic_cast<const SmartObjectArray &>(otherArrayObject);
+                if (data.size() != otherObjectArray.size()) return false;
+                for (size_t i = 0; i < data.size(); ++i)
+                    if (*data[i] != *otherObjectArray.data[i])
+                        return false;
+                return smartClass == other.smartClass;
+            } else {
+                return false;
+            }
+        }
+
     };
 
     struct SmartIntArrayObject : public SmartArrayObject {
         explicit SmartIntArrayObject(std::string_view smartClass = "") : SmartArrayObject(smartClass) {}
 
         [[nodiscard]] virtual SmartIntSubType intSubType() const = 0;
+
+        virtual void set(size_t, int8_t) = 0;
+
+        virtual void set(size_t, int16_t) = 0;
+
+        virtual void set(size_t, int32_t) = 0;
+
+        virtual void set(size_t, int64_t) = 0;
+
+        virtual void set(size_t, uint8_t) = 0;
+
+        virtual void set(size_t, uint16_t) = 0;
+
+        virtual void set(size_t, uint32_t) = 0;
+
+        virtual void set(size_t, uint64_t) = 0;
+
+        virtual void push_back(int8_t) = 0;
+
+        virtual void push_back(int16_t) = 0;
+
+        virtual void push_back(int32_t) = 0;
+
+        virtual void push_back(int64_t) = 0;
+
+        virtual void push_back(uint8_t) = 0;
+
+        virtual void push_back(uint16_t) = 0;
+
+        virtual void push_back(uint32_t) = 0;
+
+        virtual void push_back(uint64_t) = 0;
 
         virtual int8_t atInt8(size_t index) const = 0;
 
@@ -404,7 +579,14 @@ namespace l4ai::smart {
 
         virtual uint32_t atUInt32(size_t index) const = 0;
 
-        virtual int64_t atUInt64(size_t index) const = 0;
+        virtual uint64_t atUInt64(size_t index) const = 0;
+
+        virtual float atFloat32(size_t index) const = 0;
+
+        virtual double atFloat64(size_t index) const = 0;
+
+        static std::shared_ptr<SmartIntArrayObject>
+        create(SmartIntSubType subType, std::string_view smartClassName = "");
     };
 
     template<typename TInt>
@@ -428,6 +610,40 @@ namespace l4ai::smart {
 
         size_t size() const override { return data.size(); }
 
+        void resize(size_t size) override;
+
+        void set(size_t index, int8_t int8) override;
+
+        void set(size_t index, int16_t int16) override;
+
+        void set(size_t index, int32_t int32) override;
+
+        void set(size_t index, int64_t int64) override;
+
+        void set(size_t index, uint8_t uint8) override;
+
+        void set(size_t index, uint16_t uint16) override;
+
+        void set(size_t index, uint32_t uint32) override;
+
+        void set(size_t index, uint64_t uint64) override;
+
+        void push_back(int8_t int8) override;
+
+        void push_back(int16_t int16) override;
+
+        void push_back(int32_t int32) override;
+
+        void push_back(int64_t int64) override;
+
+        void push_back(uint8_t uint8) override;
+
+        void push_back(uint16_t uint16) override;
+
+        void push_back(uint32_t uint32) override;
+
+        void push_back(uint64_t uint64) override;
+
         int8_t atInt8(size_t index) const override { return data[index]; }
 
         int16_t atInt16(size_t index) const override { return data[index]; }
@@ -442,7 +658,11 @@ namespace l4ai::smart {
 
         uint32_t atUInt32(size_t index) const override { return data[index]; }
 
-        int64_t atUInt64(size_t index) const override { return data[index]; }
+        uint64_t atUInt64(size_t index) const override { return data[index]; }
+
+        float atFloat32(size_t index) const override { return data[index]; }
+
+        double atFloat64(size_t index) const override { return data[index]; }
 
 
         void get(int8_t *target, size_t target_size) const override {
@@ -484,6 +704,22 @@ namespace l4ai::smart {
         void get(double *target, size_t target_size) const override {
             for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
+
+        bool operator==(const SmartObject &other) const override {
+            if (other.smartType() != SmartType::Array) return false;
+            const auto &otherArrayObject = dynamic_cast<const SmartArrayObject &>(other);
+            if (otherArrayObject.arraySubType() == arraySubType()) {
+                const auto &otherIntArrayObject = dynamic_cast<const SmartIntArrayObject &>(otherArrayObject);
+                if (data.size() != otherIntArrayObject.size()) return false;
+                for (size_t i = 0; i < data.size(); ++i)
+                    if (data[i] != otherIntArrayObject.atInt64(i))
+                        return false;
+                return smartClass == other.smartClass;
+            } else {
+                return false;
+            }
+        }
+
     };
 
     struct SmartFloatArrayObject : public SmartArrayObject {
@@ -494,6 +730,17 @@ namespace l4ai::smart {
         virtual float atFloat32(size_t index) const = 0;
 
         virtual double atFloat64(size_t index) const = 0;
+
+        virtual void set(size_t index, float value) = 0;
+
+        virtual void set(size_t index, double value) = 0;
+
+        virtual void push_back(float value) = 0;
+
+        virtual void push_back(double value) = 0;
+
+        static std::shared_ptr<SmartFloatArrayObject>
+        create(SmartFloatSubType subType, std::string_view smartClassName = "");
     };
 
     template<typename TFloat>
@@ -518,9 +765,19 @@ namespace l4ai::smart {
 
         size_t size() const override { return data.size(); }
 
+        void resize(size_t size) override;
+
         float atFloat32(size_t index) const override { return data[index]; }
 
         double atFloat64(size_t index) const override { return data[index]; }
+
+        void set(size_t index, float value) override;
+
+        void set(size_t index, double value) override;
+
+        void push_back(float value) override;
+
+        void push_back(double value) override;
 
         void get(int8_t *target, size_t target_size) const override {
             for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
@@ -561,8 +818,145 @@ namespace l4ai::smart {
         void get(double *target, size_t target_size) const override {
             for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
         }
+
+        bool operator==(const SmartObject &other) const override {
+            if (other.smartType() != SmartType::Array) return false;
+            const auto &otherArrayObject = dynamic_cast<const SmartArrayObject &>(other);
+            if (otherArrayObject.arraySubType() == arraySubType()) {
+                const auto &otherFloatArrayObject = dynamic_cast<const SmartFloatArrayObject &>(otherArrayObject);
+                if (data.size() != otherFloatArrayObject.size()) return false;
+                for (size_t i = 0; i < data.size(); ++i)
+                    if (data[i] != otherFloatArrayObject.atFloat64(i))
+                        return false;
+                return smartClass == other.smartClass;
+            } else {
+                return false;
+            }
+        }
+
     };
 
+    constexpr bool operator>(SmartIntSubType l, SmartIntSubType r) {
+        switch (l) {
+            case SmartIntSubType::UInt8:
+                return false;
+            case SmartIntSubType::UInt16:
+                switch (r) {
+                    case SmartIntSubType::UInt8:
+                        return true;
+                    default:
+                        return false;
+                }
+            case SmartIntSubType::UInt32:
+                switch (r) {
+                    case SmartIntSubType::UInt16:
+                    case SmartIntSubType::UInt8:
+                        return true;
+                    default:
+                        return false;
+                }
+            case SmartIntSubType::UInt64:
+                switch (r) {
+                    case SmartIntSubType::UInt32:
+                    case SmartIntSubType::UInt16:
+                    case SmartIntSubType::UInt8:
+                        return true;
+                    default:
+                        return false;
+                }
+            case SmartIntSubType::SInt8:
+                return false;
+            case SmartIntSubType::SInt16:
+                switch (r) {
+                    case SmartIntSubType::SInt8:
+                    case SmartIntSubType::UInt8:
+                        return true;
+                    default:
+                        return false;
+                }
+            case SmartIntSubType::SInt32:
+                switch (r) {
+                    case SmartIntSubType::SInt16:
+                    case SmartIntSubType::SInt8:
+                    case SmartIntSubType::UInt16:
+                    case SmartIntSubType::UInt8:
+                        return true;
+                    default:
+                        return false;
+                }
+            case SmartIntSubType::SInt64:
+                switch (r) {
+                    case SmartIntSubType::SInt32:
+                    case SmartIntSubType::SInt16:
+                    case SmartIntSubType::SInt8:
+                    case SmartIntSubType::UInt64:
+                    case SmartIntSubType::UInt32:
+                    case SmartIntSubType::UInt16:
+                    case SmartIntSubType::UInt8:
+                        return true;
+                    default:
+                        return false;
+                }
+        }
+        return false;
+    }
+
+    inline constexpr bool operator>=(SmartIntSubType l, SmartIntSubType r) {
+        return (l > r) || (l == r);
+    }
+
+    inline constexpr bool operator<(SmartIntSubType l, SmartIntSubType r) {
+        return (r > l);
+    }
+
+    inline constexpr bool operator<=(SmartIntSubType l, SmartIntSubType r) {
+        return (l < r) || (l == r);
+    }
+
+    inline constexpr SmartFloatSubType minFloatType(SmartIntSubType intSubType) {
+        switch (intSubType) {
+            case SmartIntSubType::SInt8:
+            case SmartIntSubType::UInt8:
+            case SmartIntSubType::SInt16:
+            case SmartIntSubType::UInt16:
+                return SmartFloatSubType::Float32;
+            case SmartIntSubType::SInt32:
+            case SmartIntSubType::UInt32:
+            case SmartIntSubType::SInt64:
+            case SmartIntSubType::UInt64:
+                return SmartFloatSubType::Float64;
+            default:
+                throw std::runtime_error("Неизвестный целочисленный тип.");
+        }
+    }
+
+    inline constexpr bool operator>(SmartFloatSubType l, SmartFloatSubType r) {
+        switch (l) {
+            case SmartFloatSubType::Float32:
+                return false;
+            case SmartFloatSubType::Float64:
+                switch (r) {
+                    case SmartFloatSubType::Float32:
+                        return true;
+                    default:
+                        return false;
+                }
+            default:
+                return false;
+        }
+    }
+
+    inline constexpr bool operator>=(SmartFloatSubType l, SmartFloatSubType r) {
+        return (l > r) || (l == r);
+    }
+
+    inline constexpr bool operator<(SmartFloatSubType l, SmartFloatSubType r) {
+        return (r > l);
+    }
+
+    inline constexpr bool operator<=(SmartFloatSubType l, SmartFloatSubType r) {
+        return (l < r) || (l == r);
+    }
 
     class SmartMapObject : public SmartObject {
     public:
@@ -621,7 +1015,9 @@ namespace l4ai::smart {
         }
 
         template<typename TChar, typename = std::enable_if_t<is_char<TChar>>>
-        std::shared_ptr<SmartString<TChar>> setString(std::string_view name, typename SmartString<TChar>::string_view_t text, std::string_view smartClass = "") {
+        std::shared_ptr<SmartString<TChar>>
+        setString(std::string_view name, typename SmartString<TChar>::string_view_t text,
+                  std::string_view smartClass = "") {
             auto result = SmartObject::create<SmartString<TChar>>(smartClass);
             data.emplace(std::string(name), result);
             *result = std::string(text);
@@ -629,7 +1025,19 @@ namespace l4ai::smart {
         }
 
         std::shared_ptr<SmartObjectArray> setObjectArray(std::string_view name, std::string_view smartClass = "");
+
         std::shared_ptr<class SmartMapObject> setMap(std::string_view name, std::string_view smartClass = "");
+
+        bool operator==(const SmartObject &other) const override {
+            if (other.smartType() != SmartType::Map) return false;
+            const auto &otherMapObject = dynamic_cast<const SmartMapObject &>(other);
+            for (const auto &pair : data) {
+                if (otherMapObject.data.count(pair.first) == 0) return false;
+                if (*pair.second != *otherMapObject.data.at(pair.first)) return false;
+            }
+            return smartClass == other.smartClass;
+        }
+
     };
 
     using SmartUint8 = SmartInt<uint8_t>;

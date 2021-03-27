@@ -103,24 +103,24 @@ namespace my::tests {
 			out << "----------------------------------------" << endl;
 			out.flush();
 			try {
-				clock_t clk = clock();
-				test->test_function();
-				clk = clock() - clk;
-				++success;
-				out << "Тест успешно продйен за "s << clk / CLOCKS_PER_SEC << " секунд."s << endl;
-			} catch (std::exception& e) {
-				++failed;
-				err << "Тест провален с ошибкой: "s << e.what() << endl;
-				err.flush();
-			} catch (std::exception* p_e) {
-				++failed;
-				err << "Тест провален с ошибкой: "s << p_e->what() << endl;
-				err.flush();
-			} catch (...) {
-				++failed;
-				err << "Тест провален с неизвестной ошибкой."s << endl;
-				err.flush();
-			}
+                clock_t clk = clock();
+                test->test_function();
+                clk = clock() - clk;
+                ++success;
+                out << "Тест '" << *test << "' успешно продйен за "s << clk / CLOCKS_PER_SEC << " секунд."s << endl;
+            } catch (std::exception& e) {
+                ++failed;
+                err << "Тест '" << *test << "' провален с ошибкой: "s << e.what() << endl;
+                err.flush();
+            } catch (std::exception* p_e) {
+                ++failed;
+                err << "Тест '" << *test << "' провален с ошибкой: "s << p_e->what() << endl;
+                err.flush();
+            } catch (...) {
+                ++failed;
+                err << "Тест '" << *test << "' провален с неизвестной ошибкой."s << endl;
+                err.flush();
+            }
 		}
 		out << "========================================" << endl;
 		out << "=======Выполнено " << candidates.size() << " тестов из " << TestSet::current().tests.size() << " =====" << endl;
