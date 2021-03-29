@@ -92,7 +92,7 @@ namespace l4ai::algs {
         for(size_t i = 0; i < getLayersCount(); ++i) {
             result->data.push_back(getLayer(i).getConfiguration());
         }
-        return std::shared_ptr<smart::SmartObject>();
+        return result;
     }
 
 }

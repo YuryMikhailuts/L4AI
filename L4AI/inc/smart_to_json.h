@@ -45,7 +45,7 @@ namespace l4ai::smart {
     public:
         explicit SmartToJson(std::ostream &out);
 
-        void save(const std::shared_ptr<SmartObject> &smartObject);
+        void save(std::shared_ptr<SmartObject> smartObject);
     };
 
 }

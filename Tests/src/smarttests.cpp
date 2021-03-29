@@ -12,6 +12,7 @@
 #include <smart_to_json.h>
 #include <smart_from_json.h>
 #include <mytests.h>
+#include <cmath>
 
 
 using namespace std;
@@ -57,6 +58,27 @@ newTest(Сериализация и Десериализация в Json) {
     smartToJson.save(actual);
     //inf << "actual: " << ss.str() << endl << endl;
     assertEqual(*actual, *expected);
+}
+
+newTest(Сериализация и Десериализация действительных чисел) {
+    auto expected = SmartObject::create<SmartFloatArray<double>>();
+    for (size_t i = 0; i < 1000; ++i)
+        expected->data.push_back((((1.0 * rand()) / RAND_MAX) * 2 - 1.0) / (i + 1));
+    stringstream ss;
+    SmartToJson smartToJson(ss);
+    smartToJson.save(expected);
+    ss.seekp(0, ios_base::beg);
+    ss.seekg(0, ios_base::beg);
+    SmartFromJson smartFromJson(ss);
+    auto actual = smartFromJson.get()->asArray()->asFloatArray();
+    double SKO = 0;
+    for (size_t i = 0; i < 1000; ++i) {
+        double delta = (expected->data[i] - actual->atFloat64(i)) / expected->data[i];
+        SKO += delta * delta;
+    }
+    SKO = sqrt(SKO / 1000);
+    inf << "СКО: " << 100 * SKO << "%" << endl;
+    assertAbove(2e-6, SKO);
 }
 
 

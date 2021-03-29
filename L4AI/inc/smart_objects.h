@@ -698,11 +698,17 @@ namespace l4ai::smart {
         }
 
         void get(float *target, size_t target_size) const override {
-            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) {
+                float value = data.at(i);
+                target[i] = value;
+            }
         }
 
         void get(double *target, size_t target_size) const override {
-            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) {
+                double value = data.at(i);
+                target[i] = value;
+            }
         }
 
         bool operator==(const SmartObject &other) const override {
@@ -812,11 +818,17 @@ namespace l4ai::smart {
         }
 
         void get(float *target, size_t target_size) const override {
-            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) {
+                float value = data.at(i);
+                target[i] = value;
+            }
         }
 
         void get(double *target, size_t target_size) const override {
-            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) target[i] = data.at(i);
+            for (size_t i = 0; i < std::min(target_size, data.size()); ++i) {
+                double value = data.at(i);
+                target[i] = value;
+            }
         }
 
         bool operator==(const SmartObject &other) const override {

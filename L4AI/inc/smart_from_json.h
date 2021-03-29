@@ -83,13 +83,13 @@ namespace l4ai::smart {
          * Парсит массив Json
          * @return
          */
-        [[nodiscard]] std::shared_ptr<SmartArrayObject> getArray();
+        [[nodiscard]] std::shared_ptr<SmartArrayObject> getArray(std::string_view needSmartClass = "");
 
-        [[nodiscard]] std::shared_ptr<SmartMapObject> getMap();
+        [[nodiscard]] std::shared_ptr<SmartMapObject> getMap(std::string_view needSmartClass = "");
 
-        [[nodiscard]] std::shared_ptr<SmartObject> getNumber();
+        [[nodiscard]] std::shared_ptr<SmartObject> getNumber(std::string_view needSmartClass = "");
 
-        [[nodiscard]] std::shared_ptr<SmartStringObject> getString();
+        [[nodiscard]] std::shared_ptr<SmartStringObject> getString(std::string_view needSmartClass = "");
 
         /**
          * С данногометода начинается парсинг любого Json объекта.
@@ -97,7 +97,7 @@ namespace l4ai::smart {
          * Сам символ, при этом, просто проверяется, но не достаётся из потока.
          * @return
          */
-        [[nodiscard]] std::shared_ptr<SmartObject> getObject();
+        [[nodiscard]] std::shared_ptr<SmartObject> getObject(std::string_view needSmartClass = "");
 
         [[nodiscard]] bool can_read() const;
 
@@ -133,6 +133,24 @@ namespace l4ai::smart {
         std::shared_ptr<SmartObject> &
         getArrayObject(std::string &smartClass, std::shared_ptr<SmartObject> &result,
                        SmartTypeRequirement &requirement);
+
+        std::istream &getIn() const;
+
+        size_t getRowNum() const;
+
+        size_t getColNum() const;
+
+        const std::list<SmartLogRecord> &getLogList() const;
+
+        size_t getErrorsCount() const;
+
+        size_t getWarningsCount() const;
+
+        const std::optional<char> &getLastPeek() const;
+
+        const std::optional<char> &getLastGetc() const;
+
+        const std::unordered_map<std::string, SmartTypeRequirement> &getClassTypes() const;
     };
 
 }

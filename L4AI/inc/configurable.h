@@ -23,7 +23,7 @@ namespace l4ai::configure {
         [[nodiscard]] virtual std::shared_ptr<smart::SmartObject> getConfiguration() const = 0;
     };
 
-    class InvalidConfigurationException : std::invalid_argument {
+    class InvalidConfigurationException : public std::invalid_argument {
     public:
         explicit InvalidConfigurationException(const std::string &arg);
 

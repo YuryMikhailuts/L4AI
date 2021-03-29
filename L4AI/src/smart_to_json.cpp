@@ -14,7 +14,7 @@ namespace l4ai::smart {
 
     SmartToJson::SmartToJson(std::ostream &out) : out(out), tab() {}
 
-    void SmartToJson::save(const std::shared_ptr<SmartObject> &smartObject) {
+    void SmartToJson::save(std::shared_ptr<SmartObject> smartObject) {
         switch (smartObject->smartType()) {
             case SmartType::Int:
                 saveImpl(smartObject->asInt());
@@ -113,11 +113,15 @@ namespace l4ai::smart {
     }
 
     void SmartToJson::saveImpl(const std::shared_ptr<SmartMapObject> &smartMap) {
+        bool onSmartClass = !smartMap->smartClass.empty();
+        if (onSmartClass) {
+            out << tab << "{\n";
+            out << tab << R"("@class": ")" << smartMap->smartClass << "\",\n";
+            out << tab << R"("@value": )";
+            tab_inc();
+        }
         out << tab << "{\n";
         tab_inc();
-        if (!smartMap->smartClass.empty()) {
-            out << tab << R"("@class": ")" << smartMap->smartClass << "\",\n";
-        }
         auto &data = smartMap->data;
         for (auto itr = data.begin(); itr != data.end(); ++itr) {
             auto item = *itr;
@@ -131,6 +135,11 @@ namespace l4ai::smart {
         }
         tab_dec();
         out << tab << "}";
+        if (onSmartClass) {
+            tab_dec();
+            out << tab << "}";
+        }
+
     }
 
     void SmartToJson::saveImpl(const std::shared_ptr<SmartObjectArray> &smartArray) {

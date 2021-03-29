@@ -11,6 +11,7 @@
 #include <smart_from_json.h>
 #include <sstream>
 #include <utility>
+#include <cmath>
 
 namespace l4ai::smart {
     using namespace std;
@@ -25,7 +26,7 @@ namespace l4ai::smart {
 
     void SmartFromJson::log(SmartLogLevel logLevel, string_view text) {
         stringstream ss;
-        ss << "строка " << col_num << ", столбец " << row_num << ". " << text;
+        ss << "строка " << row_num << ", столбец " << col_num << ". " << text;
         logList.emplace_back(logLevel, ss.str());
     }
 
@@ -48,7 +49,7 @@ namespace l4ai::smart {
     SmartFromJson::SmartFromJson(istream &in) : in(in), row_num(1), col_num(1), logList(), errors_count(),
                                                 warnings_count(), last_peek(), last_getc(), classTypes() {}
 
-    shared_ptr<SmartObject> SmartFromJson::getObject() {
+    shared_ptr<SmartObject> SmartFromJson::getObject(std::string_view needSmartClass) {
         shared_ptr<SmartObject> result;
         while (can_read() && !result) {
             switch (peek()) {
@@ -56,11 +57,11 @@ namespace l4ai::smart {
                     result = checkClassObject(getMap());
                     break;
                 case '[':
-                    result = getArray();
+                    result = getArray(needSmartClass);
                     break;
                 case '"':
                 case '\'':
-                    result = getString();
+                    result = getString(needSmartClass);
                     break;
                 case '0':
                 case '1':
@@ -74,7 +75,7 @@ namespace l4ai::smart {
                 case '9':
                 case '+':
                 case '-':
-                    result = getNumber();
+                    result = getNumber(needSmartClass);
                     break;
                 case -1:
                     err("Неожиданный конец файла.");
@@ -87,6 +88,7 @@ namespace l4ai::smart {
                     break;
                 default:
                     wrn("Неожиданный символ '"s + (char) peek() + "'.");
+                    getc();
                     break;
             }
         }
@@ -95,7 +97,7 @@ namespace l4ai::smart {
 
     bool SmartFromJson::can_read() const { return in.good() && !in.eof(); }
 
-    shared_ptr<SmartArrayObject> SmartFromJson::getArray() {
+    shared_ptr<SmartArrayObject> SmartFromJson::getArray(std::string_view needSmartClass) {
         shared_ptr<SmartObjectArray> smartArrayObject = SmartObject::create<SmartObjectArray>();
         if (peek() == '[') getc(); else return shared_ptr<SmartObjectArray>();
         while (can_read()) {
@@ -130,7 +132,7 @@ namespace l4ai::smart {
         return smartArrayObject;
     }
 
-    shared_ptr<SmartMapObject> SmartFromJson::getMap() {
+    shared_ptr<SmartMapObject> SmartFromJson::getMap(std::string_view needSmartClass) {
         shared_ptr<SmartMapObject> smartMapObject = SmartObject::create<SmartMapObject>();;
         if (peek() == '{') getc(); else return shared_ptr<SmartMapObject>();
         while (can_read()) {
@@ -191,6 +193,7 @@ namespace l4ai::smart {
     double SmartFromJson::getFloat(double value) {
         while (can_read() && is_digit())
             value = value * 10 + (getc() - '0');
+        double factor = 1;
         if (peek() == '.') {
             getc();
             double k = 10;
@@ -199,10 +202,19 @@ namespace l4ai::smart {
                 k *= 10;
             }
         }
-        return value;
+        if (peek() == 'e') {
+            getc();
+            int power_sign = 1;
+            if (peek() == '+' || peek() == '-') {
+                power_sign = getc() == '-' ? -1 : 1;
+            }
+            double power = getInt();
+            factor = std::pow(10, power * power_sign);
+        }
+        return value * factor;
     }
 
-    shared_ptr<SmartStringObject> SmartFromJson::getString() {
+    shared_ptr<SmartStringObject> SmartFromJson::getString(std::string_view needSmartClass) {
         string text;
         char quote = (char) getc();
         while (can_read() && peek() != quote) {
@@ -285,13 +297,14 @@ namespace l4ai::smart {
         return false;
     }
 
-    shared_ptr<SmartObject> SmartFromJson::getNumber() {
+    shared_ptr<SmartObject> SmartFromJson::getNumber(std::string_view needSmartClass) {
         shared_ptr<SmartObject> result;
         int p = peek();
         int sign = 1;
         if (p == '-' || p == '+') {
             getc();
-            if (p == '-') sign = -1;
+            if (p == '-')
+                sign = -1;
         }
         switch (peek()) {
             case '0':
@@ -306,7 +319,7 @@ namespace l4ai::smart {
             case '9': {
                 uint64_t uintValue = getInt();
                 if (peek() == '.') {
-                    result = SmartFloatObject::create(getFloat(uintValue * sign));
+                    result = SmartFloatObject::create(getFloat((double) uintValue) * sign);
                 } else {
                     result = SmartIntObject::create(uintValue * sign);
                 }
@@ -667,6 +680,42 @@ namespace l4ai::smart {
                 break;
         }
         return result;
+    }
+
+    istream &SmartFromJson::getIn() const {
+        return in;
+    }
+
+    size_t SmartFromJson::getRowNum() const {
+        return row_num;
+    }
+
+    size_t SmartFromJson::getColNum() const {
+        return col_num;
+    }
+
+    const list<SmartLogRecord> &SmartFromJson::getLogList() const {
+        return logList;
+    }
+
+    size_t SmartFromJson::getErrorsCount() const {
+        return errors_count;
+    }
+
+    size_t SmartFromJson::getWarningsCount() const {
+        return warnings_count;
+    }
+
+    const optional<char> &SmartFromJson::getLastPeek() const {
+        return last_peek;
+    }
+
+    const optional<char> &SmartFromJson::getLastGetc() const {
+        return last_getc;
+    }
+
+    const unordered_map<std::string, SmartTypeRequirement> &SmartFromJson::getClassTypes() const {
+        return classTypes;
     }
 
     SmartLogRecord::SmartLogRecord(SmartLogLevel logLevel, string message) : logLevel(logLevel),
