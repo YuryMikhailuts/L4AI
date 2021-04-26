@@ -39,31 +39,31 @@ namespace l4ai::smart {
     SmartObject::~SmartObject() = default;
 
     template<>
-    SmartIntSubType SmartInt<uint8_t>::intSubType() const { return SmartIntSubType::UInt8; }
+    L4AI_EXPORT SmartIntSubType SmartInt<uint8_t>::intSubType() const { return SmartIntSubType::UInt8; }
 
     template<>
-    SmartIntSubType SmartInt<uint16_t>::intSubType() const { return SmartIntSubType::UInt16; }
+    L4AI_EXPORT SmartIntSubType SmartInt<uint16_t>::intSubType() const { return SmartIntSubType::UInt16; }
 
     template<>
-    SmartIntSubType SmartInt<uint32_t>::intSubType() const { return SmartIntSubType::UInt32; }
+    L4AI_EXPORT SmartIntSubType SmartInt<uint32_t>::intSubType() const { return SmartIntSubType::UInt32; }
 
     template<>
-    SmartIntSubType SmartInt<uint64_t>::intSubType() const { return SmartIntSubType::UInt64; }
+    L4AI_EXPORT SmartIntSubType SmartInt<uint64_t>::intSubType() const { return SmartIntSubType::UInt64; }
 
     template<>
-    SmartIntSubType SmartInt<int8_t>::intSubType() const { return SmartIntSubType::SInt8; }
+    L4AI_EXPORT SmartIntSubType SmartInt<int8_t>::intSubType() const { return SmartIntSubType::SInt8; }
 
     template<>
-    SmartIntSubType SmartInt<int16_t>::intSubType() const { return SmartIntSubType::SInt16; }
+    L4AI_EXPORT SmartIntSubType SmartInt<int16_t>::intSubType() const { return SmartIntSubType::SInt16; }
 
     template<>
-    SmartIntSubType SmartInt<int32_t>::intSubType() const { return SmartIntSubType::SInt32; }
+    L4AI_EXPORT SmartIntSubType SmartInt<int32_t>::intSubType() const { return SmartIntSubType::SInt32; }
 
     template<>
-    SmartIntSubType SmartInt<int64_t>::intSubType() const { return SmartIntSubType::SInt64; }
+    L4AI_EXPORT SmartIntSubType SmartInt<int64_t>::intSubType() const { return SmartIntSubType::SInt64; }
 
     template<>
-    SmartIntSubType SmartIntArray<uint8_t>::intSubType() const { return SmartIntSubType::UInt8; }
+    L4AI_EXPORT SmartIntSubType SmartIntArray<uint8_t>::intSubType() const { return SmartIntSubType::UInt8; }
 
     template<typename TInt>
     void SmartIntArray<TInt>::resize(size_t size) {
@@ -151,34 +151,34 @@ namespace l4ai::smart {
     }
 
     template<>
-    SmartIntSubType SmartIntArray<uint16_t>::intSubType() const { return SmartIntSubType::UInt16; }
+    L4AI_EXPORT SmartIntSubType SmartIntArray<uint16_t>::intSubType() const { return SmartIntSubType::UInt16; }
 
     template<>
-    SmartIntSubType SmartIntArray<uint32_t>::intSubType() const { return SmartIntSubType::UInt32; }
+    L4AI_EXPORT SmartIntSubType SmartIntArray<uint32_t>::intSubType() const { return SmartIntSubType::UInt32; }
 
     template<>
-    SmartIntSubType SmartIntArray<uint64_t>::intSubType() const { return SmartIntSubType::UInt64; }
+    L4AI_EXPORT SmartIntSubType SmartIntArray<uint64_t>::intSubType() const { return SmartIntSubType::UInt64; }
 
     template<>
-    SmartIntSubType SmartIntArray<int8_t>::intSubType() const { return SmartIntSubType::SInt8; }
+    L4AI_EXPORT SmartIntSubType SmartIntArray<int8_t>::intSubType() const { return SmartIntSubType::SInt8; }
 
     template<>
-    SmartIntSubType SmartIntArray<int16_t>::intSubType() const { return SmartIntSubType::SInt16; }
+    L4AI_EXPORT SmartIntSubType SmartIntArray<int16_t>::intSubType() const { return SmartIntSubType::SInt16; }
 
     template<>
-    SmartIntSubType SmartIntArray<int32_t>::intSubType() const { return SmartIntSubType::SInt32; }
+    L4AI_EXPORT SmartIntSubType SmartIntArray<int32_t>::intSubType() const { return SmartIntSubType::SInt32; }
 
     template<>
-    SmartIntSubType SmartIntArray<int64_t>::intSubType() const { return SmartIntSubType::SInt64; }
+    L4AI_EXPORT SmartIntSubType SmartIntArray<int64_t>::intSubType() const { return SmartIntSubType::SInt64; }
 
     template<>
-    SmartFloatSubType SmartFloat<float>::floatSubType() const { return SmartFloatSubType::Float32; }
+    L4AI_EXPORT SmartFloatSubType SmartFloat<float>::floatSubType() const { return SmartFloatSubType::Float32; }
 
     template<>
-    SmartFloatSubType SmartFloat<double>::floatSubType() const { return SmartFloatSubType::Float64; }
+    L4AI_EXPORT SmartFloatSubType SmartFloat<double>::floatSubType() const { return SmartFloatSubType::Float64; }
 
     template<>
-    SmartFloatSubType SmartFloatArray<float>::floatSubType() const { return SmartFloatSubType::Float32; }
+    L4AI_EXPORT SmartFloatSubType SmartFloatArray<float>::floatSubType() const { return SmartFloatSubType::Float32; }
 
     template<typename TFloat>
     void SmartFloatArray<TFloat>::resize(size_t size) {
@@ -206,23 +206,23 @@ namespace l4ai::smart {
     }
 
     template<>
-    SmartFloatSubType SmartFloatArray<double>::floatSubType() const { return SmartFloatSubType::Float64; }
+    L4AI_EXPORT SmartFloatSubType SmartFloatArray<double>::floatSubType() const { return SmartFloatSubType::Float64; }
 
     template<>
-    SmartStringSubType SmartString<char>::stringSubType() const { return SmartStringSubType::String; }
+    L4AI_EXPORT SmartStringSubType SmartString<char>::stringSubType() const { return SmartStringSubType::String; }
 
     template<>
-    SmartStringSubType SmartString<wchar_t>::stringSubType() const { return SmartStringSubType::WString; }
+    L4AI_EXPORT SmartStringSubType SmartString<wchar_t>::stringSubType() const { return SmartStringSubType::WString; }
 
     std::shared_ptr<SmartObjectArray> SmartObjectArray::addObjectArray(std::string_view smartClass) {
         auto result = SmartObject::create<SmartObjectArray>(smartClass);
-        data.template emplace_back(result);
+        data.emplace_back(result);
         return result;
     }
 
     std::shared_ptr<SmartMapObject> SmartObjectArray::addMap(std::string_view smartClass) {
         auto result = SmartObject::create<SmartMapObject>(smartClass);
-        data.template emplace_back(result);
+        data.emplace_back(result);
         return result;
     }
 
@@ -385,36 +385,35 @@ namespace l4ai::smart {
     }
 
 
-    template class SmartInt<uint8_t>;
-    template class SmartInt<uint16_t>;
-    template class SmartInt<uint32_t>;
+    template class L4AI_EXPORT SmartInt<uint8_t>;
+    template class L4AI_EXPORT SmartInt<uint16_t>;
+    template class L4AI_EXPORT SmartInt<uint32_t>;
+    template class L4AI_EXPORT SmartInt<uint64_t>;
+    template class L4AI_EXPORT SmartInt<int8_t>;
+    template class L4AI_EXPORT SmartInt<int16_t>;
+    template class L4AI_EXPORT SmartInt<int32_t>;
+    template class L4AI_EXPORT SmartInt<int64_t>;
 
-    template
-    class SmartInt<uint64_t>;
 
-    template
-    class SmartInt<int8_t>;
+    template class L4AI_EXPORT SmartIntArray<uint8_t>;
+    template class L4AI_EXPORT SmartIntArray<uint16_t>;
+    template class L4AI_EXPORT SmartIntArray<uint32_t>;
+    template class L4AI_EXPORT SmartIntArray<uint64_t>;
+    template class L4AI_EXPORT SmartIntArray<int8_t>;
+    template class L4AI_EXPORT SmartIntArray<int16_t>;
+    template class L4AI_EXPORT SmartIntArray<int32_t>;
+    template class L4AI_EXPORT SmartIntArray<int64_t>;
 
-    template
-    class SmartInt<int16_t>;
 
-    template
-    class SmartInt<int32_t>;
+    template class L4AI_EXPORT SmartFloat<float>;
+    template class L4AI_EXPORT SmartFloat<double>;
 
-    template
-    class SmartInt<int64_t>;
+    template class L4AI_EXPORT SmartFloatArray<float>;
+    template class L4AI_EXPORT SmartFloatArray<double>;
 
-    template
-    class SmartFloat<float>;
 
-    template
-    class SmartFloat<double>;
-
-    template
-    class SmartString<char>;
-
-    template
-    class SmartString<wchar_t>;
+    template struct L4AI_EXPORT SmartString<char>;
+    template struct L4AI_EXPORT SmartString<wchar_t>;
 
     std::shared_ptr<class SmartObjectArray> SmartArrayObject::asObjectArray() {
         return std::dynamic_pointer_cast<SmartObjectArray>(shared_from_this());

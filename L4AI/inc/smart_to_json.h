@@ -12,12 +12,13 @@
 #ifndef LIBRARY4_ARTIFICIAL_INTELLIGENCE_SMART_TO_JSON_H
 #define LIBRARY4_ARTIFICIAL_INTELLIGENCE_SMART_TO_JSON_H
 
+#include <L4AI_global.h>
 #include <smart_objects.h>
 #include <iostream>
 
 namespace l4ai::smart {
 
-    class SmartToJson {
+    class L4AI_EXPORT SmartToJson {
     private:
         std::ostream &out;
         std::string tab;

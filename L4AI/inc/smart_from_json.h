@@ -10,7 +10,7 @@
 
 #ifndef LIBRARY4_ARTIFICIAL_INTELLIGENCE_SMART_FROM_JSON_H
 #define LIBRARY4_ARTIFICIAL_INTELLIGENCE_SMART_FROM_JSON_H
-
+#include <L4AI_global.h>
 #include <iostream>
 #include <list>
 #include <smart_objects.h>
@@ -21,7 +21,7 @@ namespace l4ai::smart {
         Error, Warning, Info
     };
 
-    struct SmartLogRecord {
+    struct L4AI_EXPORT SmartLogRecord {
         SmartLogLevel logLevel;
         std::string message;
 
@@ -30,7 +30,7 @@ namespace l4ai::smart {
         explicit operator std::string() const;
     };
 
-    struct SmartTypeRequirement {
+    struct L4AI_EXPORT SmartTypeRequirement {
         const std::optional<SmartType> objectType;
         const std::optional<SmartIntSubType> intSubType;
         const std::optional<SmartFloatSubType> floatSubType;
@@ -57,7 +57,7 @@ namespace l4ai::smart {
                   stringSubType(stringSubType), arraySubType() {}
     };
 
-    class SmartFromJson {
+    class L4AI_EXPORT SmartFromJson {
     private:
         std::istream &in;
         size_t row_num;

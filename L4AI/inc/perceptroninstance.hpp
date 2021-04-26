@@ -84,9 +84,9 @@ namespace l4ai::algs {
     template<typename TValue>
     std::shared_ptr<SmartObject> PerceptronInstance<TValue>::getConfiguration() const {
         auto result = SmartObject::create<SmartMapObject>("PerceptronInstance");
-        result->template setInt("cols_count", cols_count);
-        result->template setInt("rows_count", rows_count);
-        result->template setFloatArray("weights", weights, cols_count * rows_count);
+        result->setInt("cols_count", cols_count);
+        result->setInt("rows_count", rows_count);
+        result->setFloatArray("weights", weights, cols_count * rows_count);
         return result;
     }
 

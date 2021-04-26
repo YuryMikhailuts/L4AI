@@ -47,7 +47,7 @@ newTest(Тест порядка вычислений на матрице с ун
 			specification->setUseShiftInput(static_cast<bool>(useShift & 1));
 			specification->setRowsOffset(rowsOffset);
 			specification->setFunction(ActivationFunctions::Trivial);
-			shared_ptr<InstanceF32> instance(move(InstanceF32::make(specification)));
+			shared_ptr<InstanceF32> instance(move(InstanceF32::make(move(specification))));
 			if (PerceptronInstF32* percInst = static_cast<PerceptronInstF32*>(&*instance); percInst != nullptr) {
 				for (size_t r = 0; r < rows; ++r) {
 					for (size_t c = 0; c < cols; ++c) {

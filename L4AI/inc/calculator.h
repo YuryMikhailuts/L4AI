@@ -38,6 +38,7 @@ namespace l4ai::algs {
 		static calculator_ptr_t make(instance_ptr_t inst);
 	};
 
+
 	using CalculatorF32 = Calculator<float>;
 	using CalculatorF64 = Calculator<double>;
 } /* namespace algs::l4ai */

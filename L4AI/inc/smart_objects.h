@@ -10,7 +10,7 @@
 
 #ifndef LIBRARY4_ARTIFICIAL_INTELLIGENCE_SMART_OBJECTS_H
 #define LIBRARY4_ARTIFICIAL_INTELLIGENCE_SMART_OBJECTS_H
-
+#include <L4AI_global.h>
 #include <string>
 #include <type_traits>
 #include <memory>
@@ -82,7 +82,7 @@ namespace l4ai::smart {
     template<typename T>
     inline static constexpr bool is_char = std::is_same_v<T, char> || std::is_same_v<T, wchar_t>;
 
-    struct SmartObject : public std::enable_shared_from_this<SmartObject> {
+    struct L4AI_EXPORT SmartObject : public std::enable_shared_from_this<SmartObject> {
         std::string smartClass;
 
         explicit SmartObject(std::string_view smartClass = "");
@@ -115,7 +115,7 @@ namespace l4ai::smart {
     };
 
 
-    struct SmartIntObject : public SmartObject {
+    struct L4AI_EXPORT SmartIntObject : public SmartObject {
         explicit SmartIntObject(std::string_view smartClass = "") : SmartObject(smartClass) {}
 
         [[nodiscard]] virtual SmartIntSubType intSubType() const = 0;
@@ -182,7 +182,7 @@ namespace l4ai::smart {
 
         bool operator==(const SmartObject &other) const override {
             if (other.smartType() != SmartType::Int) return false;
-            return this->operator long() == dynamic_cast<const SmartIntObject &>(other).operator long() &&
+            return this->operator int64_t() == dynamic_cast<const SmartIntObject &>(other).operator int64_t() &&
                    smartClass == other.smartClass;
         }
     };
@@ -194,7 +194,7 @@ namespace l4ai::smart {
         return result;
     }
 
-    struct SmartFloatObject : public SmartObject {
+    struct L4AI_EXPORT SmartFloatObject : public SmartObject {
         explicit SmartFloatObject(std::string_view smartClass = "") : SmartObject(smartClass) {}
 
         [[nodiscard]] virtual SmartFloatSubType floatSubType() const = 0;
@@ -246,7 +246,7 @@ namespace l4ai::smart {
     }
 
 
-    struct SmartStringObject : public SmartObject {
+    struct L4AI_EXPORT SmartStringObject : public SmartObject {
         explicit SmartStringObject(std::string_view smartClass = "") : SmartObject(smartClass) {}
 
         [[nodiscard]] virtual SmartStringSubType stringSubType() const = 0;
@@ -343,7 +343,7 @@ namespace l4ai::smart {
     }
 
 
-    struct SmartArrayObject : public SmartObject {
+    struct L4AI_EXPORT SmartArrayObject : public SmartObject {
         explicit SmartArrayObject(std::string_view smartClass = "") : SmartObject(smartClass) {}
 
         [[nodiscard]] SmartType smartType() const override { return SmartType::Array; }
@@ -387,7 +387,7 @@ namespace l4ai::smart {
     template<typename TInt, typename = std::enable_if_t<is_int<TInt>>> class SmartIntArray;
     template<typename TFloat, typename = std::enable_if_t<is_float<TFloat>>> class SmartFloatArray;
 
-    struct SmartObjectArray : public SmartArrayObject {
+    struct L4AI_EXPORT SmartObjectArray : public SmartArrayObject {
         explicit SmartObjectArray(std::string_view smartClass = "") : SmartArrayObject(smartClass) {}
 
         [[nodiscard]] SmartArraySubType arraySubType() const override { return SmartArraySubType::Object; };
@@ -528,7 +528,7 @@ namespace l4ai::smart {
 
     };
 
-    struct SmartIntArrayObject : public SmartArrayObject {
+    struct L4AI_EXPORT SmartIntArrayObject : public SmartArrayObject {
         explicit SmartIntArrayObject(std::string_view smartClass = "") : SmartArrayObject(smartClass) {}
 
         [[nodiscard]] virtual SmartIntSubType intSubType() const = 0;
@@ -728,7 +728,7 @@ namespace l4ai::smart {
 
     };
 
-    struct SmartFloatArrayObject : public SmartArrayObject {
+    struct L4AI_EXPORT SmartFloatArrayObject : public SmartArrayObject {
         explicit SmartFloatArrayObject(std::string_view smartClass = "") : SmartArrayObject(smartClass) {}
 
         [[nodiscard]] virtual SmartFloatSubType floatSubType() const = 0;
@@ -970,7 +970,7 @@ namespace l4ai::smart {
         return (l < r) || (l == r);
     }
 
-    class SmartMapObject : public SmartObject {
+    class L4AI_EXPORT SmartMapObject : public SmartObject {
     public:
         explicit SmartMapObject(std::string_view smartClass = "") : SmartObject(smartClass) {}
 
